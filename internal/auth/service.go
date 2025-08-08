@@ -1,23 +1,24 @@
 package auth
 
 import (
-	"dating_service/configs"
 	"dating_service/internal/cache"
 	"dating_service/internal/model"
 	"dating_service/internal/user"
 	"dating_service/pkg/JWT"
 	"golang.org/x/crypto/bcrypt"
-	"log"
+	"time"
 )
 
+const TokenDuration = time.Hour * 72
+
 type AuthService struct {
-	conf  *configs.Config
-	repo  *user.UserRepository
-	cache cache.IReferenceCache
+	repo         *user.UserRepository
+	cache        cache.IReferenceCache
+	tokenManager *JWT.JWT
 }
 
-func NewAuthService(conf *configs.Config, repo *user.UserRepository, cache cache.IReferenceCache) *AuthService {
-	return &AuthService{conf: conf, repo: repo, cache: cache}
+func NewAuthService(repo *user.UserRepository, cache cache.IReferenceCache, tm *JWT.JWT) *AuthService {
+	return &AuthService{repo: repo, cache: cache, tokenManager: tm}
 }
 
 func (service *AuthService) Register(phone string, name string, password string, sexID uint, age uint) (*string, error) {
@@ -36,25 +37,28 @@ func (service *AuthService) Register(phone string, name string, password string,
 		return nil, err
 	}
 
-	err = service.repo.Create(&model.User{
+	createdUser := &model.User{
 		Phone:    phone,
 		Name:     name,
 		Password: string(hashedPassword),
 		SexID:    sexID,
 		Age:      age,
-	})
+	}
+
+	err = service.repo.Create(createdUser)
 	if err != nil {
-		log.Println(err.Error())
 		return nil, err
 	}
-	jwt, err := JWT.NewJWT(service.conf.SecretToken.Token).GenerateToken(&JWT.JWTData{
-		Phone: phone,
-	})
-	return &jwt, nil
+
+	token, err := service.tokenManager.GenerateToken(createdUser.ID, TokenDuration)
+	if err != nil {
+		return nil, err
+	}
+
+	return &token, nil
 }
 
 func (service *AuthService) Login(phone, password string) (*string, error) {
-
 	user, err := service.repo.FindByPhone(phone)
 	if err != nil {
 		return nil, err
@@ -62,15 +66,16 @@ func (service *AuthService) Login(phone, password string) (*string, error) {
 	if user == nil {
 		return nil, ErrIncorrectPasswordOrPhone
 	}
+
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return nil, ErrIncorrectPasswordOrPhone
 	}
-	jwt, err := JWT.NewJWT(service.conf.SecretToken.Token).GenerateToken(&JWT.JWTData{
-		Phone: phone,
-	})
+
+	token, err := service.tokenManager.GenerateToken(user.ID, TokenDuration)
 	if err != nil {
 		return nil, err
 	}
-	return &jwt, nil
+
+	return &token, nil
 }

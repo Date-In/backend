@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"context"
 	"dating_service/configs"
 	"dating_service/pkg/JWT"
+	"golang.org/x/net/context"
 	"net/http"
 	"strings"
 )
@@ -11,7 +11,7 @@ import (
 type key string
 
 const (
-	ContextPhoneKey key = "ContextPhoneKey"
+	ContextIdKey key = "ContextIdKey"
 )
 
 func writeUnauthorized(w http.ResponseWriter) {
@@ -27,12 +27,13 @@ func IsAuthed(next http.Handler, conf configs.Config) http.Handler {
 			return
 		}
 		token := strings.TrimPrefix(authedHeader, "Bearer ")
-		isValid, data := JWT.NewJWT(conf.SecretToken.Token).ParseToken(token)
-		if !isValid {
+
+		userID, err := JWT.NewJWT(conf.SecretToken.Token).ParseToken(token)
+		if err != nil {
 			writeUnauthorized(w)
 			return
 		}
-		ctx := context.WithValue(r.Context(), ContextPhoneKey, data.Phone)
+		ctx := context.WithValue(r.Context(), ContextIdKey, userID)
 		req := r.WithContext(ctx)
 		next.ServeHTTP(w, req)
 	})
