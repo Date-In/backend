@@ -20,7 +20,7 @@ func NewAuthHandler(router *http.ServeMux, service *AuthService) {
 
 func (handler *AuthHandler) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := req.HandleBody[RegisterRequestDto](&w, r)
+		body, err := req.HandleBody[RegisterRequestDto](r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -48,7 +48,7 @@ func (handler *AuthHandler) Register() http.HandlerFunc {
 
 func (handler *AuthHandler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := req.HandleBody[LoginRequestDto](&w, r)
+		body, err := req.HandleBody[LoginRequestDto](r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
