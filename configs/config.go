@@ -16,7 +16,7 @@ type BdConfig struct {
 }
 
 type SecretToken struct {
-	token string
+	Token string
 }
 
 func NewConfig() *Config {
@@ -29,7 +29,7 @@ func NewConfig() *Config {
 			DSN: os.Getenv("DSN"),
 		},
 		SecretToken: &SecretToken{
-			token: os.Getenv("TOKEN"),
+			Token: os.Getenv("TOKEN"),
 		},
 	}
 }
