@@ -31,3 +31,25 @@ func (repo *UserRepository) FindByPhone(phone string) (*model.User, error) {
 	}
 	return &user, nil
 }
+
+func (repo *UserRepository) FindById(id uint) (*model.User, error) {
+	var user model.User
+	err := repo.db.PgDb.
+		Preload("Sex").
+		Preload("ZodiacSign").
+		Preload("Worldview").
+		Preload("TypeOfDating").
+		Preload("Education").
+		Preload("AttitudeToAlcohol").
+		Preload("AttitudeToSmoking").
+		Preload("Status").
+		Preload("Interests").
+		Preload("Photos").
+		Where("id = ?", id).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+	}
+	return &user, err
+}
