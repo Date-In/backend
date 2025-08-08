@@ -2,7 +2,6 @@ package model
 
 import (
 	"gorm.io/gorm"
-	"time"
 )
 
 type Sex struct {
@@ -47,21 +46,21 @@ type Status struct {
 
 type User struct {
 	gorm.Model
-	Name                string    `gorm:"size:100;not null"`
-	Phone               string    `gorm:"unique;size:20"`
-	Password            string    `gorm:"not null"`
-	Birthday            time.Time `gorm:"type:date"`
-	Bio                 string    `gorm:"type:text"`
-	Children            bool
-	Height              uint
+	Name                string  `gorm:"size:100;not null"`
+	Phone               string  `gorm:"unique;size:20"`
+	Password            string  `gorm:"not null"`
+	Age                 uint    `gorm:"not null"`
+	Bio                 *string `gorm:"type:text"`
+	Children            *bool
+	Height              *uint
 	SexID               uint
-	ZodiacSignID        uint
-	WorldviewID         uint
-	TypeOfDatingID      uint
-	EducationID         uint
-	AttitudeToAlcoholID uint
-	AttitudeToSmokingID uint
-	StatusID            uint
+	ZodiacSignID        *uint
+	WorldviewID         *uint
+	TypeOfDatingID      *uint
+	EducationID         *uint
+	AttitudeToAlcoholID *uint
+	AttitudeToSmokingID *uint
+	StatusID            *uint
 	Sex                 Sex               `gorm:"foreignKey:SexID"`
 	ZodiacSign          ZodiacSign        `gorm:"foreignKey:ZodiacSignID"`
 	Worldview           Worldview         `gorm:"foreignKey:WorldviewID"`
