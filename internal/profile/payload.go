@@ -23,3 +23,18 @@ type ReferenceDto struct {
 	ID   *uint   `json:"id"`
 	Name *string `json:"name"`
 }
+
+type UpdateInfoRequestDto struct {
+	Name                *string `json:"name"`
+	Age                 *uint   `json:"age" validate:"min=18"`
+	Bio                 *string `json:"bio"`
+	Children            *bool   `json:"children"`
+	Height              *uint   `json:"height"`
+	SexId               *uint   `json:"sex_id"`
+	ZodiacSignId        *uint   `json:"zodiac_sign_id"`
+	WorldviewId         *uint   `json:"worldview_id"`
+	TypeOfDatingId      *uint   `json:"type_of_dating_id"`
+	EducationId         *uint   `json:"education_id"`
+	AttitudeToAlcoholId *uint   `json:"attitude_to_alcohol_id"`
+	AttitudeToSmokingId *uint   `json:"attitude_to_smoking_id"`
+}

@@ -53,3 +53,17 @@ func (repo *UserRepository) FindById(id uint) (*model.User, error) {
 	}
 	return &user, err
 }
+
+func (repo *UserRepository) Update(id uint, updateData *model.User) error {
+	result := repo.db.PgDb.
+		Model(&model.User{}).
+		Where("id = ?", id).
+		Updates(updateData)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}

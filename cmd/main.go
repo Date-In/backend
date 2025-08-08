@@ -28,7 +28,7 @@ func main() {
 	userRepository := user.NewUserRepository(db)
 	//service
 	authService := auth.NewAuthService(userRepository, refCache, tokenGenerator)
-	profileService := profile.NewProfileService(userRepository)
+	profileService := profile.NewProfileService(userRepository, refCache)
 	//handler
 	profile.NewProfileHandler(router, profileService, config)
 	auth.NewAuthHandler(router, authService)
