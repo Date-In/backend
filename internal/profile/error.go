@@ -11,4 +11,5 @@ var (
 	ErrInvalidEducationId           = errors.New("invalid education id")
 	ErrInvalidAttitudeToAlcoholicId = errors.New("invalid attitude to alcoholic id")
 	ErrInvalidAttitudeToSmokingId   = errors.New("invalid attitude to smoking id")
+	ErrInvalidInterestId            = errors.New("invalid interest id")
 )

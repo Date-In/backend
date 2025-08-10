@@ -187,3 +187,10 @@ func (c *referenceCache) IsValidInterestIDs(ids []uint) bool {
 
 	return true
 }
+
+func (c *referenceCache) IsValidInterest(id uint) bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	_, exists := c.interestIDs[id]
+	return exists
+}
