@@ -19,6 +19,7 @@ func NewProfileHandler(router *http.ServeMux, service *ProfileService, config *c
 	handler := &ProfileHandler{service: service, config: *config}
 	router.Handle("GET /profile", middleware.IsAuthed(handler.GetInfo(), handler.config))
 	router.Handle("PATCH /profile", middleware.IsAuthed(handler.UpdateProfile(), handler.config))
+	router.Handle("PUT /profile/interests", middleware.IsAuthed(handler.UpdateInterests(), handler.config))
 }
 
 func (handler *ProfileHandler) GetInfo() http.HandlerFunc {
@@ -83,5 +84,26 @@ func (handler *ProfileHandler) UpdateProfile() http.HandlerFunc {
 			return
 		}
 		res.Json(w, ToProfileResponseDto(updatedUser), http.StatusOK)
+	}
+}
+
+func (handler *ProfileHandler) UpdateInterests() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := utilits.GetIdContext(w, r)
+		body, err := req.HandleBody[UpdateInterestRequestDto](r)
+		if err != nil {
+			return
+		}
+		updatedInterests, err := handler.service.UpdateInterests(userID, body.InterestIDs)
+		if err != nil {
+			if errors.Is(err, ErrInvalidInterestId) {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		res.Json(w, updatedInterests, http.StatusOK)
 	}
 }

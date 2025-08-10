@@ -4,6 +4,7 @@ import (
 	"dating_service/internal/cache"
 	"dating_service/internal/model"
 	"dating_service/internal/user"
+	"fmt"
 )
 
 type ProfileService struct {
@@ -111,4 +112,26 @@ func (service *ProfileService) Update(
 		return nil, err
 	}
 	return service.repo.FindById(id)
+}
+
+func (service *ProfileService) UpdateInterests(userID uint, interestIDs []uint) ([]*model.Interest, error) {
+	if !service.cache.IsValidInterestIDs(interestIDs) {
+		return nil, ErrInvalidInterestId
+	}
+	interestsToSet := make([]*model.Interest, len(interestIDs))
+	for i, id := range interestIDs {
+		interestsToSet[i] = &model.Interest{ID: id}
+	}
+
+	err := service.repo.ReplaceInterests(userID, interestsToSet)
+	if err != nil {
+		return nil, fmt.Errorf("ошибка в репозитории при замене интересов для userID %d: %w", userID, err)
+	}
+
+	updatedUser, err := service.repo.FindById(userID)
+	if err != nil {
+		return nil, fmt.Errorf("не удалось получить профиль после обновления интересов: %w", err)
+	}
+
+	return updatedUser.Interests, nil
 }

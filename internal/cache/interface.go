@@ -18,4 +18,6 @@ type IReferenceCache interface {
 	IsValidStatusID(id uint) bool
 
 	IsValidInterestIDs(ids []uint) bool
+
+	IsValidInterest(id uint) bool
 }

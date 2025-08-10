@@ -38,3 +38,7 @@ type UpdateInfoRequestDto struct {
 	AttitudeToAlcoholId *uint   `json:"attitude_to_alcohol_id"`
 	AttitudeToSmokingId *uint   `json:"attitude_to_smoking_id"`
 }
+
+type UpdateInterestRequestDto struct {
+	InterestIDs []uint `json:"interests" validate:"required,min=1,dive,gt=0"`
+}

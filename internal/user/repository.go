@@ -67,3 +67,12 @@ func (repo *UserRepository) Update(id uint, updateData *model.User) error {
 	}
 	return nil
 }
+
+func (r *UserRepository) ReplaceInterests(userID uint, interests []*model.Interest) error {
+	var user model.User
+	user.ID = userID
+
+	err := r.db.PgDb.Model(&user).Association("Interests").Replace(interests)
+
+	return err
+}
