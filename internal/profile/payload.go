@@ -6,6 +6,7 @@ type GetInfoResponseDto struct {
 	Phone             string          `json:"phone"`
 	Age               uint            `json:"age"`
 	Bio               *string         `json:"bio"`
+	City              *string         `json:"city"`
 	Children          *bool           `json:"children"`
 	Height            *uint           `json:"height"`
 	Sex               *ReferenceDto   `json:"sex"`
@@ -26,8 +27,9 @@ type ReferenceDto struct {
 
 type UpdateInfoRequestDto struct {
 	Name                *string `json:"name"`
-	Age                 *uint   `json:"age" validate:"min=18"`
+	Age                 *uint   `json:"age"`
 	Bio                 *string `json:"bio"`
+	City                *string `json:"city"`
 	Children            *bool   `json:"children"`
 	Height              *uint   `json:"height"`
 	SexId               *uint   `json:"sex_id"`
@@ -40,5 +42,5 @@ type UpdateInfoRequestDto struct {
 }
 
 type UpdateInterestRequestDto struct {
-	InterestIDs []uint `json:"interests" validate:"required,min=1,dive,gt=0"`
+	InterestIDs []uint `json:"interests" validate:"required"`
 }

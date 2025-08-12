@@ -3,17 +3,21 @@ package profile
 import (
 	"dating_service/internal/cache"
 	"dating_service/internal/model"
+	"dating_service/internal/photo"
 	"dating_service/internal/user"
+	"errors"
 	"fmt"
+	"gorm.io/gorm"
 )
 
 type ProfileService struct {
-	repo  *user.UserRepository
-	cache cache.IReferenceCache
+	repo            *user.UserRepository
+	photoRepository *photo.PhotoRepository
+	cache           cache.IReferenceCache
 }
 
-func NewProfileService(repo *user.UserRepository, cache cache.IReferenceCache) *ProfileService {
-	return &ProfileService{repo, cache}
+func NewProfileService(repo *user.UserRepository, photoRepo *photo.PhotoRepository, cache cache.IReferenceCache) *ProfileService {
+	return &ProfileService{repo, photoRepo, cache}
 }
 
 func (service *ProfileService) GetInfo(id uint) (*model.User, error) {
@@ -33,6 +37,7 @@ func (service *ProfileService) Update(
 	age *uint,
 	bio *string,
 	children *bool,
+	city *string,
 	height *uint,
 	sexID *uint,
 	zodiacSignID *uint,
@@ -63,6 +68,9 @@ func (service *ProfileService) Update(
 	}
 	if bio != nil {
 		updateUser.Bio = bio
+	}
+	if city != nil {
+		updateUser.City = city
 	}
 	if children != nil {
 		updateUser.Children = children
@@ -134,4 +142,37 @@ func (service *ProfileService) UpdateInterests(userID uint, interestIDs []uint) 
 	}
 
 	return updatedUser.Interests, nil
+}
+
+func (service *ProfileService) AddPhoto(fileName, fileType string, data []byte, userID uint) (*string, error) {
+	count, err := service.photoRepository.CountPhoto(userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+	if count >= 5 {
+		return nil, ErrLimitPhoto
+	}
+	photo := model.NewPhoto(fileName, fileType, data, userID)
+	err = service.photoRepository.Save(photo)
+	if err != nil {
+		return nil, err
+	}
+	return &photo.ID, nil
+}
+
+func (service *ProfileService) DeletePhoto(photoId string, userId uint) error {
+	rowsAffected, err := service.photoRepository.DeleteById(photoId, userId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrPhotoNotFound
+		}
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrPhotoNotFound
+	}
+	return nil
 }

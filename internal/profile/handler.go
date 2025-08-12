@@ -7,6 +7,8 @@ import (
 	"dating_service/pkg/res"
 	"dating_service/pkg/utilits"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -20,8 +22,21 @@ func NewProfileHandler(router *http.ServeMux, service *ProfileService, config *c
 	router.Handle("GET /profile", middleware.IsAuthed(handler.GetInfo(), handler.config))
 	router.Handle("PATCH /profile", middleware.IsAuthed(handler.UpdateProfile(), handler.config))
 	router.Handle("PUT /profile/interests", middleware.IsAuthed(handler.UpdateInterests(), handler.config))
+	router.Handle("POST /profile/photos", middleware.IsAuthed(handler.AddPhoto(), handler.config))
+	router.Handle("DELETE /profile/photo/{photoId}", middleware.IsAuthed(handler.DeletePhoto(), handler.config))
 }
 
+// GetInfo godoc
+// @Summary      Получение информации о профиле
+// @Description  Возвращает данные профиля текущего пользователя
+// @Tags         Profile
+// @Accept       json
+// @Produce      json
+// @Success      200 {object} GetInfoResponseDto "Информация о профиле"
+// @Failure      404 {string} string "Пользователь не найден"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     ApiKeyAuth
+// @Router       /profile [get]
 func (handler *ProfileHandler) GetInfo() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
@@ -39,6 +54,16 @@ func (handler *ProfileHandler) GetInfo() http.HandlerFunc {
 	}
 }
 
+// UpdateProfile godoc
+// @Summary      Обновить данные о профиле
+// @Description  Возвращает данные профиля текущего пользователя
+// @Tags         Profile
+// @Accept       json
+// @Produce      json
+// @Param credentials  body      UpdateInfoRequestDto   true  "Данные для обновления"
+// @Success      200 {object} GetInfoResponseDto "Информация о профиле"
+// @Security     ApiKeyAuth
+// @Router       /profile [patch]
 func (handler *ProfileHandler) UpdateProfile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
@@ -52,6 +77,7 @@ func (handler *ProfileHandler) UpdateProfile() http.HandlerFunc {
 			body.Age,
 			body.Bio,
 			body.Children,
+			body.City,
 			body.Height,
 			body.SexId,
 			body.ZodiacSignId,
@@ -87,6 +113,16 @@ func (handler *ProfileHandler) UpdateProfile() http.HandlerFunc {
 	}
 }
 
+// UpdateInterests godoc
+// @Summary      Обновить данные об интересах
+// @Description  Возвращает данные профиля текущего пользователя
+// @Tags         Profile
+// @Accept       json
+// @Produce      json
+// @Param credentials  body      UpdateInterestRequestDto   true  "Данные для обновления"
+// @Success 200 {array} model.Interest "Список интересов"
+// @Security     ApiKeyAuth
+// @Router       /profile/interests [put]
 func (handler *ProfileHandler) UpdateInterests() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
@@ -105,5 +141,87 @@ func (handler *ProfileHandler) UpdateInterests() http.HandlerFunc {
 		}
 
 		res.Json(w, updatedInterests, http.StatusOK)
+	}
+}
+
+// AddPhoto godoc
+// @Summary      Добавить фотографию в профиль
+// @Description  Загружает файл фотографии для текущего пользователя. Принимает multipart/form-data с ключом "photo".
+// @Tags         Profile
+// @Accept       multipart/form-data
+// @Produce      text/plain
+// @Param        photo formData file true "Файл фотографии для загрузки"
+// @Success      201 {string} string "UUID созданной фотографии"
+// @Failure      400 {string} string "Некорректный запрос (например, файл не предоставлен)"
+// @Failure      401 {string} string "Пользователь не авторизован"
+// @Failure      404 {string} string "Пользователь не найден"
+// @Failure      409 {string} string "Достигнут лимит на количество фотографий"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     ApiKeyAuth
+// @Router       /profile/photos [post]
+func (handler *ProfileHandler) AddPhoto() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := utilits.GetIdContext(w, r)
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			http.Error(w, ErrCannotParse.Error(), http.StatusBadRequest)
+			return
+		}
+
+		file, fileHeader, err := r.FormFile("photo")
+		if err != nil {
+			http.Error(w, ErrNotFoundKeyPhoto.Error(), http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+		data, err := io.ReadAll(file)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		photoID, err := handler.service.AddPhoto(fileHeader.Filename, fileHeader.Header.Get("Content-Type"), data, userID)
+		if err != nil {
+			switch {
+			case errors.Is(err, ErrLimitPhoto):
+				http.Error(w, ErrLimitPhoto.Error(), http.StatusConflict)
+			case errors.Is(err, ErrUserNotFound):
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			default:
+				fmt.Println(err)
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+			return
+		}
+		res.Json(w, photoID, http.StatusCreated)
+	}
+}
+
+// DeletePhoto godoc
+// @Summary      Удаление фотографии пользователя
+// @Description  Удаляет фотографию, принадлежащую текущему авторизованному пользователю.
+// @Tags         Profile
+// @Accept       json
+// @Produce      json
+// @Param        photoId   path      string  true  "UUID фотографии для удаления"
+// @Success      204  {string}  string  "No Content - фотография успешно удалена"
+// @Failure      401  {string}  string  "Пользователь не авторизован"
+// @Failure      404  {string}  string  "Фотография не найдена или нет прав на удаление"
+// @Failure      500  {string}  string  "Внутренняя ошибка сервера"
+// @Security     ApiKeyAuth
+// @Router       /profile/photo/{photoId} [delete]
+func (handler *ProfileHandler) DeletePhoto() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		photoID := r.PathValue("photoId")
+		userID := utilits.GetIdContext(w, r)
+		err := handler.service.DeletePhoto(photoID, userID)
+		if err != nil {
+			if errors.Is(err, ErrPhotoNotFound) {
+				http.Error(w, err.Error(), http.StatusNotFound)
+			} else {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }

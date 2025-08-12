@@ -1,4 +1,8 @@
 ```
+insert into sexes(id, name) values
+                                (1, 'male'),
+                                (2, 'female')
+                                
 -- Заполнение таблицы 'educations' (Образование)
 INSERT INTO educations (id, name) VALUES
                                       (1, 'Среднее'),
