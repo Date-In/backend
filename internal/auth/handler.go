@@ -18,6 +18,15 @@ func NewAuthHandler(router *http.ServeMux, service *AuthService) {
 	router.HandleFunc("POST /auth/login", handler.Login())
 }
 
+// Register godoc
+// @Summary      Регистрация нового пользователя
+// @Description  Создает нового пользователя и возвращает JWT токен для доступа к защищенным ресурсам
+// @Tags         Authentication
+// @Accept       json
+// @Produce      json
+// @Param        credentials  body      RegisterRequestDto   true  "Данные для регистрации"
+// @Success      201          {string} 	string
+// @Router       /auth/register [post]
 func (handler *AuthHandler) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := req.HandleBody[RegisterRequestDto](r)
@@ -46,6 +55,15 @@ func (handler *AuthHandler) Register() http.HandlerFunc {
 	}
 }
 
+// Login godoc
+// @Summary      Вход пользователя в систему
+// @Description  Аутентифицирует пользователя и возвращает JWT токен в теле ответа как обычный текст (plain text)
+// @Tags         Authentication
+// @Accept       json
+// @Produce      plain
+// @Param        credentials  body      LoginRequestDto     true  "Данные для входа"
+// @Success      200          {string}  string              "eyJhbGciOiJIU..."
+// @Router       /auth/login [post]
 func (handler *AuthHandler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := req.HandleBody[LoginRequestDto](r)

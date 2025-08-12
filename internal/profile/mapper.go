@@ -12,6 +12,7 @@ func ToProfileResponseDto(user *model.User) *GetInfoResponseDto {
 		Name:     user.Name,
 		Phone:    user.Phone,
 		Age:      user.Age,
+		City:     user.City,
 		Bio:      user.Bio,
 		Children: user.Children,
 		Height:   user.Height,

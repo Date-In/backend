@@ -51,6 +51,7 @@ type User struct {
 	Password            string  `gorm:"not null"`
 	Age                 uint    `gorm:"not null"`
 	Bio                 *string `gorm:"type:text"`
+	City                *string
 	Children            *bool
 	Height              *uint
 	SexID               uint
@@ -72,5 +73,5 @@ type User struct {
 	Interests           []*Interest       `gorm:"many2many:user_interests;"`
 	LikesSent           []Like            `gorm:"foreignKey:UserID"`
 	LikesReceived       []Like            `gorm:"foreignKey:TargetID"`
-	Photos              []*Photo          `gorm:"many2many:user_photos;"`
+	Photos              []*Photo          `gorm:"foreignKey:UserID"`
 }

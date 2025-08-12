@@ -12,4 +12,8 @@ var (
 	ErrInvalidAttitudeToAlcoholicId = errors.New("invalid attitude to alcoholic id")
 	ErrInvalidAttitudeToSmokingId   = errors.New("invalid attitude to smoking id")
 	ErrInvalidInterestId            = errors.New("invalid interest id")
+	ErrCannotParse                  = errors.New("cannot parse file")
+	ErrLimitPhoto                   = errors.New("photo limit reached")
+	ErrNotFoundKeyPhoto             = errors.New("the file with the 'photo' key was not found")
+	ErrPhotoNotFound                = errors.New("photo not found")
 )
