@@ -280,5 +280,6 @@ func (handler *ProfileHandler) getAvatar() http.HandlerFunc {
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
+		res.Json(w, avatarId, 200)
 	}
 }

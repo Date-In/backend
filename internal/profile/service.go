@@ -190,5 +190,5 @@ func (service *ProfileService) GetAvatar(userID uint) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	return "http://localhost:8081/photo/" + avatarId, nil
 }
