@@ -24,6 +24,8 @@ func NewProfileHandler(router *http.ServeMux, service *ProfileService, config *c
 	router.Handle("PUT /profile/interests", middleware.IsAuthed(handler.UpdateInterests(), handler.config))
 	router.Handle("POST /profile/photos", middleware.IsAuthed(handler.AddPhoto(), handler.config))
 	router.Handle("DELETE /profile/photo/{photoId}", middleware.IsAuthed(handler.DeletePhoto(), handler.config))
+	router.Handle("PATCH /profile/photo/change-avatar/{photoId}", middleware.IsAuthed(handler.UpdateAvatar(), handler.config))
+	router.Handle("GET /profile/avatar", middleware.IsAuthed(handler.getAvatar(), handler.config))
 }
 
 // GetInfo godoc
@@ -223,5 +225,60 @@ func (handler *ProfileHandler) DeletePhoto() http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+// UpdateAvatar godoc
+// @Summary      Обновление аватара пользователя
+// @Description  Устанавливает указанную фотографию как аватар пользователя. Только фотографии, принадлежащие пользователю, могут быть установлены как аватар.
+// @Tags         Profile
+// @Accept       json
+// @Produce      json
+// @Param        photoId   path      string  true  "UUID фотографии для установки как аватар"
+// @Success      200  {object}  string  "ID нового аватара"
+// @Failure      401  {string}  string  "Пользователь не авторизован"
+// @Failure      404  {string}  string  "Фотография не найдена или не принадлежит пользователю"
+// @Failure      500  {string}  string  "Внутренняя ошибка сервера"
+// @Security     ApiKeyAuth
+// @Router       /profile/photo/change-avatar/{photoId} [patch]
+func (handler *ProfileHandler) UpdateAvatar() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := utilits.GetIdContext(w, r)
+		photoID := r.PathValue("photoId")
+		newAvatar, err := handler.service.UpdateAvatar(photoID, userID)
+		if err != nil {
+			switch {
+			case errors.Is(err, ErrPhotoNotFound):
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			default:
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+			return
+		}
+		res.Json(w, newAvatar, http.StatusOK)
+	}
+}
+
+// getAvatar godoc
+// @Summary Получить аватар пользователя
+// @Description Возвращает ID текущего аватара авторизованного пользователя
+// @Tags Profile
+// @Produce json
+// @Success 200 {string} string "ID аватара пользователя"
+// @Failure 404 {string} string "Not Found - аватар не установлен"
+// @Failure 401 {string} string "Unauthorized - пользователь не авторизован"
+// @Failure 500 {string} string "Internal Server Error - ошибка сервера"
+// @Security ApiKeyAuth
+// @Router /profile/avatar [get]
+func (handler *ProfileHandler) getAvatar() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := utilits.GetIdContext(w, r)
+		avatarId, err := handler.service.GetAvatar(userID)
+		if avatarId == "" {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		}
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
 	}
 }

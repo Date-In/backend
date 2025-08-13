@@ -176,3 +176,19 @@ func (service *ProfileService) DeletePhoto(photoId string, userId uint) error {
 	}
 	return nil
 }
+
+func (service *ProfileService) UpdateAvatar(photoId string, userID uint) (string, error) {
+	newAvatarId, err := service.photoRepository.ChangeAvatarUser(userID, photoId)
+	if err != nil {
+		return "", err
+	}
+	return newAvatarId, nil
+}
+
+func (service *ProfileService) GetAvatar(userID uint) (string, error) {
+	avatarId, err := service.photoRepository.FindAvatar(userID)
+	if err != nil {
+		return "", err
+	}
+
+}

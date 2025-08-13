@@ -41,4 +41,5 @@ func ToProfileResponseDto(user *model.User) *GetInfoResponseDto {
 		dto.Interests = make([]*ReferenceDto, 0)
 	}
 	return dto
+
 }

@@ -2,25 +2,28 @@ package main
 
 import (
 	"dating_service/internal/model"
-	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"log"
 	"os"
 	"time"
+
+	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func main() {
+	log.Println("Starting database migration...")
 	temp := time.Now()
-	err := godotenv.Load(".env")
-	if err != nil {
-		panic("Error loading .env file")
-	}
+
+	_ = godotenv.Load()
+
 	db, err := gorm.Open(postgres.Open(os.Getenv("DSN")), &gorm.Config{})
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to connect to database for migration: %v", err)
 	}
-	db.AutoMigrate(
+
+	log.Println("Database connected. Running AutoMigrate...")
+	err = db.AutoMigrate(
 		&model.User{},
 		&model.Sex{},
 		&model.Education{},
@@ -37,5 +40,10 @@ func main() {
 		&model.Message{},
 		&model.Photo{},
 	)
-	log.Printf("Migration complete time: %.3fs", time.Since(temp).Seconds())
+
+	if err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
+	}
+
+	log.Printf("Migration completed successfully in %.3fs", time.Since(temp).Seconds())
 }

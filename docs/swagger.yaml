@@ -49,6 +49,8 @@ definitions:
         type: string
       children:
         type: boolean
+      city:
+        type: string
       education:
         $ref: '#/definitions/profile.ReferenceDto'
       height:
@@ -93,6 +95,8 @@ definitions:
         type: string
       children:
         type: boolean
+      city:
+        type: string
       education_id:
         type: integer
       height:
@@ -344,6 +348,42 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Удаление фотографии пользователя
+      tags:
+      - Profile
+  /profile/photo/change-avatar/{photoId}:
+    patch:
+      consumes:
+      - application/json
+      description: Устанавливает указанную фотографию как аватар пользователя. Только
+        фотографии, принадлежащие пользователю, могут быть установлены как аватар.
+      parameters:
+      - description: UUID фотографии для установки как аватар
+        in: path
+        name: photoId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID нового аватара
+          schema:
+            type: string
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            type: string
+        "404":
+          description: Фотография не найдена или не принадлежит пользователю
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Обновление аватара пользователя
       tags:
       - Profile
   /profile/photos:

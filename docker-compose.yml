@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:13-alpine
+    container_name: dating_db
+    restart: always
+    environment:
+      POSTGRES_USER: Userr
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: dating_service
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U Userr -d dating_service"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./migrate"]
+    container_name: dating_migrate
+    env_file:
+      - .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build: .
+    container_name: dating_app
+    restart: always
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env.docker
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
