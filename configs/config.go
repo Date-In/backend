@@ -2,7 +2,6 @@ package configs
 
 import (
 	"github.com/joho/godotenv"
-	"log"
 	"os"
 )
 
@@ -20,10 +19,8 @@ type SecretToken struct {
 }
 
 func NewConfig() *Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	_ = godotenv.Load()
+
 	return &Config{
 		BdConfig: &BdConfig{
 			DSN: os.Getenv("DSN"),
