@@ -18,6 +18,8 @@ type GetInfoResponseDto struct {
 	AttitudeToSmoking *ReferenceDto   `json:"attitude_to_smoking"`
 	Status            *ReferenceDto   `json:"status"`
 	Interests         []*ReferenceDto `json:"interests"`
+	Avatar            *string         `json:"avatar"`
+	Photo             []string        `json:"photo"`
 }
 
 type ReferenceDto struct {

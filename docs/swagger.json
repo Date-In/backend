@@ -294,6 +294,61 @@
                 }
             }
         },
+        "/profile/photo/change-avatar/{photoId}": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Устанавливает указанную фотографию как аватар пользователя. Только фотографии, принадлежащие пользователю, могут быть установлены как аватар.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Обновление аватара пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID фотографии для установки как аватар",
+                        "name": "photoId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ID нового аватара",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Фотография не найдена или не принадлежит пользователю",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/profile/photo/{photoId}": {
             "delete": {
                 "security": [
@@ -491,6 +546,9 @@
                 "children": {
                     "type": "boolean"
                 },
+                "city": {
+                    "type": "string"
+                },
                 "education": {
                     "$ref": "#/definitions/profile.ReferenceDto"
                 },
@@ -557,6 +615,9 @@
                 },
                 "children": {
                     "type": "boolean"
+                },
+                "city": {
+                    "type": "string"
                 },
                 "education_id": {
                     "type": "integer"
