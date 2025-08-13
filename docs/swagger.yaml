@@ -45,6 +45,8 @@ definitions:
         $ref: '#/definitions/profile.ReferenceDto'
       attitude_to_smoking:
         $ref: '#/definitions/profile.ReferenceDto'
+      avatar:
+        type: string
       bio:
         type: string
       children:
@@ -65,6 +67,10 @@ definitions:
         type: string
       phone:
         type: string
+      photo:
+        items:
+          type: string
+        type: array
       sex:
         $ref: '#/definitions/profile.ReferenceDto'
       status:
@@ -287,6 +293,33 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Обновить данные о профиле
+      tags:
+      - Profile
+  /profile/avatar:
+    get:
+      description: Возвращает ID текущего аватара авторизованного пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID аватара пользователя
+          schema:
+            type: string
+        "401":
+          description: Unauthorized - пользователь не авторизован
+          schema:
+            type: string
+        "404":
+          description: Not Found - аватар не установлен
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error - ошибка сервера
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Получить аватар пользователя
       tags:
       - Profile
   /profile/interests:

@@ -259,6 +259,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/profile/avatar": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает ID текущего аватара авторизованного пользователя",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Получить аватар пользователя",
+                "responses": {
+                    "200": {
+                        "description": "ID аватара пользователя",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - пользователь не авторизован",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - аватар не установлен",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error - ошибка сервера",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/profile/interests": {
             "put": {
                 "security": [
@@ -547,6 +590,9 @@ const docTemplate = `{
                 "attitude_to_smoking": {
                     "$ref": "#/definitions/profile.ReferenceDto"
                 },
+                "avatar": {
+                    "type": "string"
+                },
                 "bio": {
                     "type": "string"
                 },
@@ -576,6 +622,12 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string"
+                },
+                "photo": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "sex": {
                     "$ref": "#/definitions/profile.ReferenceDto"
