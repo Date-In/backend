@@ -28,6 +28,7 @@ func (service *ProfileService) GetInfo(id uint) (*model.User, error) {
 	if user == nil {
 		return nil, ErrUserNotFound
 	}
+	PreloadCache(user, service.cache)
 	return user, nil
 }
 
@@ -48,12 +49,14 @@ func (service *ProfileService) Update(
 	attitudeToSmokingID *uint,
 ) (*model.User, error) {
 	updateUser, err := service.repo.FindById(id)
+	PreloadCache(updateUser, service.cache)
 	if err != nil {
 		return nil, err
 	}
 	if updateUser == nil {
 		return nil, ErrUserNotFound
 	}
+	PreloadCache(updateUser, service.cache)
 	if name != nil {
 		updateUser.Name = *name
 	}
@@ -119,7 +122,9 @@ func (service *ProfileService) Update(
 	if err != nil {
 		return nil, err
 	}
-	return service.repo.FindById(id)
+	userUpd, err := service.repo.FindById(id)
+	PreloadCache(userUpd, service.cache)
+	return updateUser, err
 }
 
 func (service *ProfileService) UpdateInterests(userID uint, interestIDs []uint) ([]*model.Interest, error) {
@@ -191,4 +196,36 @@ func (service *ProfileService) GetAvatar(userID uint) (string, error) {
 		return "", err
 	}
 	return "http://localhost:8081/photo/" + avatarId, nil
+}
+
+func PreloadCache(user *model.User, c cache.IReferenceCache) {
+	if user.SexID == 0 {
+		user.Sex = c.GetSexByID(user.SexID)
+	}
+	if user.ZodiacSignID != nil {
+		user.ZodiacSign = c.GetZodiacSignByID(*user.ZodiacSignID)
+	}
+	if user.WorldviewID != nil {
+		user.Worldview = c.GetWorldviewByID(*user.WorldviewID)
+
+	}
+	if user.TypeOfDatingID != nil {
+		user.TypeOfDating = c.GetTypeOfDatingByID(*user.TypeOfDatingID)
+
+	}
+	if user.EducationID != nil {
+		user.Education = c.GetEducationByID(*user.EducationID)
+
+	}
+	if user.AttitudeToAlcoholID != nil {
+		user.AttitudeToAlcohol = c.GetAttitudeToAlcoholByID(*user.AttitudeToAlcoholID)
+
+	}
+	if user.AttitudeToSmokingID != nil {
+		user.AttitudeToSmoking = c.GetAttitudeToSmokingByID(*user.AttitudeToSmokingID)
+
+	}
+	if user.StatusID != nil {
+		user.Status = c.GetStatusByID(*user.StatusID)
+	}
 }
