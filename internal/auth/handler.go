@@ -2,7 +2,6 @@ package auth
 
 import (
 	"dating_service/pkg/req"
-	"dating_service/pkg/res"
 	"dating_service/pkg/utilits"
 	"errors"
 	"net/http"
@@ -51,7 +50,9 @@ func (handler *AuthHandler) Register() http.HandlerFunc {
 			}
 			return
 		}
-		res.Json(w, token, http.StatusCreated)
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(*token))
+		w.WriteHeader(http.StatusCreated)
 	}
 }
 
@@ -86,6 +87,8 @@ func (handler *AuthHandler) Login() http.HandlerFunc {
 			}
 			return
 		}
-		res.Json(w, token, http.StatusOK)
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(*token))
+		w.WriteHeader(http.StatusOK)
 	}
 }
