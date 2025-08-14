@@ -35,14 +35,6 @@ func (repo *UserRepository) FindByPhone(phone string) (*model.User, error) {
 func (repo *UserRepository) FindById(id uint) (*model.User, error) {
 	var user model.User
 	err := repo.db.PgDb.
-		Preload("Sex").
-		Preload("ZodiacSign").
-		Preload("Worldview").
-		Preload("TypeOfDating").
-		Preload("Education").
-		Preload("AttitudeToAlcohol").
-		Preload("AttitudeToSmoking").
-		Preload("Status").
 		Preload("Interests").
 		Preload("Photos").
 		Where("id = ?", id).First(&user).Error
