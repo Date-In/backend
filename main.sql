@@ -86,3 +86,7 @@ INSERT INTO interests (id, name) VALUES
                                      (24, 'Концерты'),
                                      (25, 'История'),
                                      (26, 'Психология');
+insert into statuses (id, name) values
+                                    (1, 'active'),
+                                    (2,'non_active'),
+                                    (3, 'blocked')
