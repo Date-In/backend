@@ -84,6 +84,178 @@
                 }
             }
         },
+        "/filter": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает текущие настройки фильтра поиска для аутентифицированного пользователя.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Filters"
+                ],
+                "summary": "Получение фильтра поиска",
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ с данными фильтра",
+                        "schema": {
+                            "$ref": "#/definitions/filter.GetFilterDto"
+                        }
+                    },
+                    "404": {
+                        "description": "Фильтр для данного пользователя не найден",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/filter/create": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Создает новый фильтр поиска для текущего аутентифицированного пользователя.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Filters"
+                ],
+                "summary": "Создание фильтра поиска",
+                "parameters": [
+                    {
+                        "description": "Данные для создания фильтра",
+                        "name": "filterData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/filter.CreateFilterDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Фильтр успешно создан",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные запроса",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/filter/update": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Обновляет существующий фильтр поиска для текущего пользователя. Позволяет частичное обновление: можно передать только те поля, которые нужно изменить.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Filters"
+                ],
+                "summary": "Обновление фильтра поиска",
+                "parameters": [
+                    {
+                        "description": "Данные для обновления фильтра (можно передавать только изменяемые поля)",
+                        "name": "filterUpdateData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/filter.UpdateFilterDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Фильтр успешно обновлен",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные запроса",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Фильтр не найден",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/photo/{id}/all": {
             "get": {
                 "description": "Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.",
@@ -513,6 +685,75 @@
                     }
                 }
             }
+        },
+        "/recommendations": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает отсортированный по релевантности (match score) список пользователей. Параметры пагинации передаются через query-параметры в URL.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recommendations"
+                ],
+                "summary": "Получение списка рекомендаций",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Номер страницы. По умолчанию: 1",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество элементов на странице. По умолчанию: 20",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ со списком рекомендованных пользователей",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/recommendations.ScoredUser"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный формат параметров пагинации",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Текущий пользователь или его фильтр не найден",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -554,6 +795,57 @@
                 "phone": {
                     "type": "string",
                     "minLength": 8
+                },
+                "sex_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "filter.CreateFilterDto": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string"
+                },
+                "max_age": {
+                    "type": "integer"
+                },
+                "min_age": {
+                    "type": "integer"
+                },
+                "sex_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "filter.GetFilterDto": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string"
+                },
+                "max_age": {
+                    "type": "integer"
+                },
+                "min_age": {
+                    "type": "integer"
+                },
+                "sex_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "filter.UpdateFilterDto": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string"
+                },
+                "max_age": {
+                    "type": "integer"
+                },
+                "min_age": {
+                    "type": "integer"
                 },
                 "sex_id": {
                     "type": "integer"
@@ -705,6 +997,18 @@
                     "items": {
                         "type": "integer"
                     }
+                }
+            }
+        },
+        "recommendations.ScoredUser": {
+            "type": "object",
+            "properties": {
+                "score": {
+                    "type": "number",
+                    "format": "float64"
+                },
+                "userID": {
+                    "type": "integer"
                 }
             }
         }
