@@ -30,6 +30,39 @@ definitions:
     - phone
     - sex_id
     type: object
+  filter.CreateFilterDto:
+    properties:
+      location:
+        type: string
+      max_age:
+        type: integer
+      min_age:
+        type: integer
+      sex_id:
+        type: integer
+    type: object
+  filter.GetFilterDto:
+    properties:
+      location:
+        type: string
+      max_age:
+        type: integer
+      min_age:
+        type: integer
+      sex_id:
+        type: integer
+    type: object
+  filter.UpdateFilterDto:
+    properties:
+      location:
+        type: string
+      max_age:
+        type: integer
+      min_age:
+        type: integer
+      sex_id:
+        type: integer
+    type: object
   model.Interest:
     properties:
       id:
@@ -127,6 +160,14 @@ definitions:
     required:
     - interests
     type: object
+  recommendations.ScoredUser:
+    properties:
+      score:
+        format: float64
+        type: number
+      userID:
+        type: integer
+    type: object
 host: localhost:8081
 info:
   contact:
@@ -187,6 +228,119 @@ paths:
       summary: Регистрация нового пользователя
       tags:
       - Authentication
+  /filter:
+    get:
+      description: Возвращает текущие настройки фильтра поиска для аутентифицированного
+        пользователя.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с данными фильтра
+          schema:
+            $ref: '#/definitions/filter.GetFilterDto'
+        "404":
+          description: Фильтр для данного пользователя не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получение фильтра поиска
+      tags:
+      - Filters
+  /filter/create:
+    post:
+      consumes:
+      - application/json
+      description: Создает новый фильтр поиска для текущего аутентифицированного пользователя.
+      parameters:
+      - description: Данные для создания фильтра
+        in: body
+        name: filterData
+        required: true
+        schema:
+          $ref: '#/definitions/filter.CreateFilterDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Фильтр успешно создан
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Некорректные данные запроса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Создание фильтра поиска
+      tags:
+      - Filters
+  /filter/update:
+    patch:
+      consumes:
+      - application/json
+      description: 'Обновляет существующий фильтр поиска для текущего пользователя.
+        Позволяет частичное обновление: можно передать только те поля, которые нужно
+        изменить.'
+      parameters:
+      - description: Данные для обновления фильтра (можно передавать только изменяемые
+          поля)
+        in: body
+        name: filterUpdateData
+        required: true
+        schema:
+          $ref: '#/definitions/filter.UpdateFilterDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Фильтр успешно обновлен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Некорректные данные запроса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Фильтр не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновление фильтра поиска
+      tags:
+      - Filters
   /photo/{id}/all:
     get:
       description: Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.
@@ -463,6 +617,51 @@ paths:
       summary: Добавить фотографию в профиль
       tags:
       - Profile
+  /recommendations:
+    get:
+      description: Возвращает отсортированный по релевантности (match score) список
+        пользователей. Параметры пагинации передаются через query-параметры в URL.
+      parameters:
+      - description: 'Номер страницы. По умолчанию: 1'
+        in: query
+        name: page
+        type: integer
+      - description: 'Количество элементов на странице. По умолчанию: 20'
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ со списком рекомендованных пользователей
+          schema:
+            items:
+              $ref: '#/definitions/recommendations.ScoredUser'
+            type: array
+        "400":
+          description: Некорректный формат параметров пагинации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Текущий пользователь или его фильтр не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получение списка рекомендаций
+      tags:
+      - Recommendations
 securityDefinitions:
   ApiKeyAuth:
     in: header

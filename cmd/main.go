@@ -5,8 +5,10 @@ import (
 	_ "dating_service/docs"
 	"dating_service/internal/auth"
 	"dating_service/internal/cache"
+	"dating_service/internal/filter"
 	"dating_service/internal/photo"
 	"dating_service/internal/profile"
+	"dating_service/internal/recommendations"
 	"dating_service/internal/user"
 	"dating_service/pkg/JWT"
 	db2 "dating_service/pkg/db"
@@ -47,14 +49,19 @@ func main() {
 	//repository
 	userRepository := user.NewUserRepository(db)
 	photoRepository := photo.NewPhotoRepository(db)
+	filterRepository := filter.NewFilterRepository(db)
 	//service
 	authService := auth.NewAuthService(userRepository, refCache, tokenGenerator)
 	profileService := profile.NewProfileService(userRepository, photoRepository, refCache)
 	photoService := photo.NewPhotoService(photoRepository)
+	filterService := filter.NewFilterService(filterRepository)
+	recommendationService := recommendations.NewRecommendationService(userRepository, filterRepository)
 	//handler
 	profile.NewProfileHandler(router, profileService, config)
 	auth.NewAuthHandler(router, authService)
 	photo.NewPhotoHandler(router, photoService)
+	filter.NewFilterHandler(router, filterService, config)
+	recommendations.NewRecommendationHandler(router, recommendationService, config)
 
 	stackMiddleware := middleware.Chain(
 		middleware.CORS,

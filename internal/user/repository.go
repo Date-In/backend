@@ -76,3 +76,52 @@ func (r *UserRepository) ReplaceInterests(userID uint, interests []*model.Intere
 
 	return err
 }
+
+func (repo *UserRepository) FindUsersWithFilter(minAge, maxAge, sexID uint, location string, page, pageSize int) (*PaginatedUsersResult, error) {
+	var users []*model.User
+	query := repo.db.PgDb.Model(&model.User{})
+	var totalCount int64
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	offset := (page - 1) * pageSize
+	query = query.Where("age BETWEEN ? AND ?", minAge, maxAge).
+		Where("sex_id = ?", sexID)
+	if location != "" {
+		query = query.Where("city = ?", location)
+	}
+	err := query.Count(&totalCount).Error
+	if err != nil {
+		return nil, err
+	}
+	query = query.
+		Offset(offset).
+		Limit(pageSize).
+		Preload("Photos").
+		Preload("Interests")
+	result := query.Find(&users)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	paginatedResult := &PaginatedUsersResult{
+		Users:      users,
+		TotalCount: totalCount,
+	}
+
+	return paginatedResult, nil
+}
+
+func (repo *UserRepository) FindUserWithoutEntity(userId uint) (*model.User, error) {
+	var user *model.User
+	err := repo.db.PgDb.First(&user, "id = ?", userId).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
+}
