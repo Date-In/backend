@@ -1,8 +1,6 @@
 package filter
 
 import (
-	"dating_service/configs"
-	"dating_service/pkg/middleware"
 	"dating_service/pkg/req"
 	"dating_service/pkg/res"
 	"dating_service/pkg/utilits"
@@ -12,14 +10,13 @@ import (
 
 type FilterHandler struct {
 	service *FilterService
-	conf    configs.Config
 }
 
-func NewFilterHandler(router *http.ServeMux, service *FilterService, conf *configs.Config) {
-	handler := &FilterHandler{service: service, conf: *conf}
-	router.Handle("GET /filter", middleware.IsAuthed(handler.GetFilter(), handler.conf))
-	router.Handle("POST /filter/create", middleware.IsAuthed(handler.CreateFilter(), handler.conf))
-	router.Handle("PATCH /filter/update", middleware.IsAuthed(handler.UpdateFilter(), handler.conf))
+func NewFilterHandler(router *http.ServeMux, service *FilterService) {
+	handler := &FilterHandler{service: service}
+	router.Handle("GET /filter", handler.GetFilter())
+	router.Handle("POST /filter/create", handler.CreateFilter())
+	router.Handle("PATCH /filter/update", handler.UpdateFilter())
 }
 
 // CreateFilter godoc

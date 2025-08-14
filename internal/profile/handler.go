@@ -1,8 +1,6 @@
 package profile
 
 import (
-	"dating_service/configs"
-	"dating_service/pkg/middleware"
 	"dating_service/pkg/req"
 	"dating_service/pkg/res"
 	"dating_service/pkg/utilits"
@@ -14,18 +12,17 @@ import (
 
 type ProfileHandler struct {
 	service *ProfileService
-	config  configs.Config
 }
 
-func NewProfileHandler(router *http.ServeMux, service *ProfileService, config *configs.Config) {
-	handler := &ProfileHandler{service: service, config: *config}
-	router.Handle("GET /profile", middleware.IsAuthed(handler.GetInfo(), handler.config))
-	router.Handle("PATCH /profile", middleware.IsAuthed(handler.UpdateProfile(), handler.config))
-	router.Handle("PUT /profile/interests", middleware.IsAuthed(handler.UpdateInterests(), handler.config))
-	router.Handle("POST /profile/photos", middleware.IsAuthed(handler.AddPhoto(), handler.config))
-	router.Handle("DELETE /profile/photo/{photoId}", middleware.IsAuthed(handler.DeletePhoto(), handler.config))
-	router.Handle("PATCH /profile/photo/change-avatar/{photoId}", middleware.IsAuthed(handler.UpdateAvatar(), handler.config))
-	router.Handle("GET /profile/avatar", middleware.IsAuthed(handler.getAvatar(), handler.config))
+func NewProfileHandler(router *http.ServeMux, service *ProfileService) {
+	handler := &ProfileHandler{service: service}
+	router.Handle("GET /profile", handler.GetInfo())
+	router.Handle("PATCH /profile", handler.UpdateProfile())
+	router.Handle("PUT /profile/interests", handler.UpdateInterests())
+	router.Handle("POST /profile/photos", handler.AddPhoto())
+	router.Handle("DELETE /profile/photo/{photoId}", handler.DeletePhoto())
+	router.Handle("PATCH /profile/photo/change-avatar/{photoId}", handler.UpdateAvatar())
+	router.Handle("GET /profile/avatar", handler.getAvatar())
 }
 
 // GetInfo godoc

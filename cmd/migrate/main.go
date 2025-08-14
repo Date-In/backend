@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dating_service/internal/action"
 	"dating_service/internal/model"
 	"log"
 	"os"
@@ -39,6 +40,7 @@ func main() {
 		&model.Match{},
 		&model.Message{},
 		&model.Photo{},
+		action.Actions{},
 	)
 
 	if err != nil {

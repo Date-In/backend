@@ -924,7 +924,7 @@ const docTemplate = `{
                 "sex": {
                     "$ref": "#/definitions/profile.ReferenceDto"
                 },
-                "status": {
+                "action": {
                     "$ref": "#/definitions/profile.ReferenceDto"
                 },
                 "type_of_dating": {

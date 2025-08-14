@@ -1,8 +1,6 @@
 package recommendations
 
 import (
-	"dating_service/configs"
-	"dating_service/pkg/middleware"
 	"dating_service/pkg/res"
 	"dating_service/pkg/utilits"
 	"errors"
@@ -12,12 +10,11 @@ import (
 
 type RecommendationHandler struct {
 	service *RecommendationService
-	conf    configs.Config
 }
 
-func NewRecommendationHandler(router *http.ServeMux, service *RecommendationService, config *configs.Config) {
-	handler := &RecommendationHandler{service: service, conf: *config}
-	router.Handle("GET /recommendations", middleware.IsAuthed(handler.GetRecommendations(), handler.conf))
+func NewRecommendationHandler(router *http.ServeMux, service *RecommendationService) {
+	handler := &RecommendationHandler{service: service}
+	router.Handle("GET /recommendations", handler.GetRecommendations())
 }
 
 // GetRecommendations godoc
