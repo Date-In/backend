@@ -89,4 +89,4 @@ INSERT INTO interests (id, name) VALUES
 insert into statuses (id, name) values
                                     (1, 'active'),
                                     (2,'non_active'),
-                                    (3, 'blocked')
+                                    (3, 'blocked');

@@ -43,6 +43,7 @@ func (service *AuthService) Register(phone string, name string, password string,
 		Password: string(hashedPassword),
 		SexID:    sexID,
 		Age:      age,
+		StatusID: 1,
 	}
 
 	err = service.repo.Create(createdUser)

@@ -61,7 +61,7 @@ type User struct {
 	EducationID         *uint
 	AttitudeToAlcoholID *uint
 	AttitudeToSmokingID *uint
-	StatusID            *uint
+	StatusID            uint
 	Sex                 Sex               `gorm:"foreignKey:SexID"`
 	ZodiacSign          ZodiacSign        `gorm:"foreignKey:ZodiacSignID"`
 	Worldview           Worldview         `gorm:"foreignKey:WorldviewID"`

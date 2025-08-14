@@ -16,7 +16,7 @@ type GetInfoResponseDto struct {
 	Education         *ReferenceDto   `json:"education"`
 	AttitudeToAlcohol *ReferenceDto   `json:"attitude_to_alcohol"`
 	AttitudeToSmoking *ReferenceDto   `json:"attitude_to_smoking"`
-	Status            *ReferenceDto   `json:"status"`
+	Status            *ReferenceDto   `json:"action"`
 	Interests         []*ReferenceDto `json:"interests"`
 	Avatar            *string         `json:"avatar"`
 	Photo             []string        `json:"photo"`

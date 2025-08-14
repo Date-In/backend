@@ -225,7 +225,7 @@ func PreloadCache(user *model.User, c cache.IReferenceCache) {
 		user.AttitudeToSmoking = c.GetAttitudeToSmokingByID(*user.AttitudeToSmokingID)
 
 	}
-	if user.StatusID != nil {
-		user.Status = c.GetStatusByID(*user.StatusID)
+	if user.StatusID != 0 {
+		user.Status = c.GetStatusByID(user.StatusID)
 	}
 }
