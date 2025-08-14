@@ -10,15 +10,15 @@ import (
 type referenceCache struct {
 	mu sync.RWMutex
 
-	sexIDs               map[uint]struct{}
-	educationIDs         map[uint]struct{}
-	zodiacSignIDs        map[uint]struct{}
-	worldviewIDs         map[uint]struct{}
-	typeOfDatingIDs      map[uint]struct{}
-	attitudeToAlcoholIDs map[uint]struct{}
-	attitudeToSmokingIDs map[uint]struct{}
-	statusIDs            map[uint]struct{}
-	interestIDs          map[uint]struct{}
+	sexIDs               map[uint]model.Sex
+	educationIDs         map[uint]model.Education
+	zodiacSignIDs        map[uint]model.ZodiacSign
+	worldviewIDs         map[uint]model.Worldview
+	typeOfDatingIDs      map[uint]model.TypeOfDating
+	attitudeToAlcoholIDs map[uint]model.AttitudeToAlcohol
+	attitudeToSmokingIDs map[uint]model.AttitudeToSmoking
+	statusIDs            map[uint]model.Status
+	interestIDs          map[uint]model.Interest
 }
 
 func NewReferenceCache(db *db.Db) (IReferenceCache, error) {
@@ -27,81 +27,81 @@ func NewReferenceCache(db *db.Db) (IReferenceCache, error) {
 	if err := db.PgDb.Find(&sexes).Error; err != nil {
 		return nil, err
 	}
-	sexMap := make(map[uint]struct{}, len(sexes))
+	sexMap := make(map[uint]model.Sex, len(sexes))
 	for _, item := range sexes {
-		sexMap[item.ID] = struct{}{}
+		sexMap[item.ID] = item
 	}
 
 	var educations []model.Education
 	if err := db.PgDb.Find(&educations).Error; err != nil {
 		return nil, err
 	}
-	eduMap := make(map[uint]struct{}, len(educations))
+	eduMap := make(map[uint]model.Education, len(educations))
 	for _, item := range educations {
-		eduMap[item.ID] = struct{}{}
+		eduMap[item.ID] = item
 	}
 
 	var zodiacSigns []model.ZodiacSign
 	if err := db.PgDb.Find(&zodiacSigns).Error; err != nil {
 		return nil, err
 	}
-	zodiacMap := make(map[uint]struct{}, len(zodiacSigns))
+	zodiacMap := make(map[uint]model.ZodiacSign, len(zodiacSigns))
 	for _, item := range zodiacSigns {
-		zodiacMap[item.ID] = struct{}{}
+		zodiacMap[item.ID] = item
 	}
 
 	var worldviews []model.Worldview
 	if err := db.PgDb.Find(&worldviews).Error; err != nil {
 		return nil, err
 	}
-	worldviewMap := make(map[uint]struct{}, len(worldviews))
+	worldviewMap := make(map[uint]model.Worldview, len(worldviews))
 	for _, item := range worldviews {
-		worldviewMap[item.ID] = struct{}{}
+		worldviewMap[item.ID] = item
 	}
 
 	var typesOfDating []model.TypeOfDating
 	if err := db.PgDb.Find(&typesOfDating).Error; err != nil {
 		return nil, err
 	}
-	datingMap := make(map[uint]struct{}, len(typesOfDating))
+	datingMap := make(map[uint]model.TypeOfDating, len(typesOfDating))
 	for _, item := range typesOfDating {
-		datingMap[item.ID] = struct{}{}
+		datingMap[item.ID] = item
 	}
 
 	var alcoholAttitudes []model.AttitudeToAlcohol
 	if err := db.PgDb.Find(&alcoholAttitudes).Error; err != nil {
 		return nil, err
 	}
-	alcoholMap := make(map[uint]struct{}, len(alcoholAttitudes))
+	alcoholMap := make(map[uint]model.AttitudeToAlcohol, len(alcoholAttitudes))
 	for _, item := range alcoholAttitudes {
-		alcoholMap[item.ID] = struct{}{}
+		alcoholMap[item.ID] = item
 	}
 
 	var smokingAttitudes []model.AttitudeToSmoking
 	if err := db.PgDb.Find(&smokingAttitudes).Error; err != nil {
 		return nil, err
 	}
-	smokingMap := make(map[uint]struct{}, len(smokingAttitudes))
+	smokingMap := make(map[uint]model.AttitudeToSmoking, len(smokingAttitudes))
 	for _, item := range smokingAttitudes {
-		smokingMap[item.ID] = struct{}{}
+		smokingMap[item.ID] = item
 	}
 
 	var statuses []model.Status
 	if err := db.PgDb.Find(&statuses).Error; err != nil {
 		return nil, err
 	}
-	statusMap := make(map[uint]struct{}, len(statuses))
+	statusMap := make(map[uint]model.Status, len(statuses))
 	for _, item := range statuses {
-		statusMap[item.ID] = struct{}{}
+		statusMap[item.ID] = item
 	}
 
 	var interests []model.Interest
 	if err := db.PgDb.Find(&interests).Error; err != nil {
 		return nil, err
 	}
-	interestMap := make(map[uint]struct{}, len(interests))
+	interestMap := make(map[uint]model.Interest, len(interests))
 	for _, item := range interests {
-		interestMap[item.ID] = struct{}{}
+		interestMap[item.ID] = item
 	}
 
 	log.Println("The directory cache has been loaded successfully")
@@ -193,4 +193,58 @@ func (c *referenceCache) IsValidInterest(id uint) bool {
 	defer c.mu.RUnlock()
 	_, exists := c.interestIDs[id]
 	return exists
+}
+
+func (c *referenceCache) GetSexByID(id uint) model.Sex {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.sexIDs[id]
+}
+
+func (c *referenceCache) GetEducationByID(id uint) model.Education {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.educationIDs[id]
+}
+
+func (c *referenceCache) GetZodiacSignByID(id uint) model.ZodiacSign {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.zodiacSignIDs[id]
+}
+
+func (c *referenceCache) GetWorldviewByID(id uint) model.Worldview {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.worldviewIDs[id]
+}
+
+func (c *referenceCache) GetTypeOfDatingByID(id uint) model.TypeOfDating {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.typeOfDatingIDs[id]
+}
+
+func (c *referenceCache) GetAttitudeToAlcoholByID(id uint) model.AttitudeToAlcohol {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.attitudeToAlcoholIDs[id]
+}
+
+func (c *referenceCache) GetAttitudeToSmokingByID(id uint) model.AttitudeToSmoking {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.attitudeToSmokingIDs[id]
+}
+
+func (c *referenceCache) GetStatusByID(id uint) model.Status {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.statusIDs[id]
+}
+
+func (c *referenceCache) GetInterestByID(id uint) model.Interest {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.interestIDs[id]
 }
