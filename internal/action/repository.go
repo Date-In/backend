@@ -4,6 +4,7 @@ import (
 	"dating_service/pkg/db"
 	"errors"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"time"
 )
 
@@ -28,19 +29,25 @@ func (repo *ActionsRepository) Get(userID uint) (*Actions, error) {
 }
 
 func (repo *ActionsRepository) Update(userID uint, actionTime time.Time) error {
-	err := repo.db.PgDb.Where("user_id = ?", userID).First(&Actions{}).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			repo.db.PgDb.Create(&Actions{userID, actionTime})
-		} else {
-			return err
-		}
-	} else {
-		err = repo.db.PgDb.Updates(&Actions{userID, actionTime}).Error
-		if err != nil {
-			return err
-		}
-		return nil
+	action := Actions{
+		UserID: userID,
+		Action: actionTime,
 	}
-	return nil
+	err := repo.db.PgDb.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "user_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"action"}),
+	}).Create(&action).Error
+
+	return err
+}
+
+func (repo *ActionsRepository) GetNonActiveUserIds(olderThan time.Time) ([]uint, error) {
+	var userIds []uint
+	err := repo.db.PgDb.Model(&Actions{}).
+		Where("action < ? ", olderThan).
+		Pluck("user_id", &userIds).Error
+	if err != nil {
+		return nil, err
+	}
+	return userIds, nil
 }

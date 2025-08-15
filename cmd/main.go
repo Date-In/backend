@@ -61,7 +61,16 @@ func main() {
 	photoService := photo.NewPhotoService(photoRepository)
 	filterService := filter.NewFilterService(filterRepository)
 	recommendationService := recommendations.NewRecommendationService(userRepository, filterRepository)
-	actionService := action.NewActionsService(actionsRepository)
+	actionService := action.NewActionsService(userRepository, actionsRepository)
+	//background tasks
+	go func() {
+		ticker := time.NewTicker(24 * time.Hour)
+		defer ticker.Stop()
+		for {
+			actionService.ChangeStatusToNonActive()
+			<-ticker.C
+		}
+	}()
 	//handler-public
 	publicRouter.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 	auth.NewAuthHandler(publicRouter, authService)
@@ -72,9 +81,11 @@ func main() {
 	recommendations.NewRecommendationHandler(protectedRouter, recommendationService)
 	//middlewares
 	authMiddleware := middleware.NewAuthMiddleware(*config)
+	checkBlockedUserMiddleware := middleware.NewCheckBlockedUserMiddleware(userRepository)
 	statusUpdateMiddleware := middleware.NewStatusUpdateMiddleware(actionService)
 	protectedStackMiddleware := middleware.Chain(
 		authMiddleware,
+		checkBlockedUserMiddleware,
 		statusUpdateMiddleware,
 	)
 	globalStackMiddleware := middleware.Chain(
