@@ -31,6 +31,7 @@ type ScoringWeights struct {
 	EducationBaseWeight       float64
 	AttitudeBaseWeight        float64
 	SharedInterestsBaseWeight float64
+	CandidateIsActive         float64
 }
 
 func DefaultWeights() ScoringWeights {
@@ -43,6 +44,7 @@ func DefaultWeights() ScoringWeights {
 		EducationBaseWeight:       25,
 		AttitudeBaseWeight:        80,
 		SharedInterestsBaseWeight: 50,
+		CandidateIsActive:         300,
 	}
 }
 
@@ -80,6 +82,10 @@ func calculateInterestsScore(userInterests, candidateInterests []*model.Interest
 
 func CalculateMatchScore(currentUser, candidateUser *model.User, weights ScoringWeights) float64 {
 	var score float64
+
+	if candidateUser.SexID == 3 || candidateUser.SexID == 2 {
+		score -= weights.CandidateIsActive
+	}
 
 	if candidateUser.Bio != nil && *candidateUser.Bio != "" {
 		score += weights.HasBioBonus

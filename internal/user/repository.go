@@ -117,3 +117,32 @@ func (repo *UserRepository) FindUserWithoutEntity(userId uint) (*model.User, err
 	}
 	return user, nil
 }
+
+func (repo *UserRepository) ChangeStatusUsers(ids []uint) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	return repo.db.PgDb.Model(&model.User{}).Where("id IN (?) AND status_id != 3", ids).Update("status_id", 2).Error
+}
+
+func (repo *UserRepository) ReactivateUser(userID uint) error {
+	result := repo.db.PgDb.Model(&model.User{}).
+		Where("id = ? AND status_id = ? AND status_id != 3", userID, 2).
+		Update("status_id", 1)
+	return result.Error
+}
+
+func (repo *UserRepository) GetStatusUser(id uint) (uint, error) {
+	var statusID uint
+	err := repo.db.PgDb.Model(&model.User{}).
+		Select("status_id").
+		Where("id = ?", id).
+		Scan(&statusID).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, nil
+		}
+		return 0, err
+	}
+	return statusID, nil
+}
