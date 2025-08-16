@@ -263,6 +263,101 @@ const docTemplate = `{
                 }
             }
         },
+        "/like/all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает список всех лайков, поставленных текущим авторизованным пользователем.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Получить список своих лайков",
+                "responses": {
+                    "200": {
+                        "description": "Список лайков",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/like.LikeDto"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/like/{target_id}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Текущий авторизованный пользователь ставит лайк другому пользователю. Если лайк взаимный, создается мэтч.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Создать лайк",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя, которого нужно лайкнуть",
+                        "name": "target_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created - Лайк успешно создан",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный ID пользователя в URL",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/photo/{id}/all": {
             "get": {
                 "description": "Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.",
@@ -859,6 +954,20 @@ const docTemplate = `{
                 }
             }
         },
+        "like.LikeDto": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "target_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.Interest": {
             "type": "object",
             "properties": {
@@ -873,6 +982,9 @@ const docTemplate = `{
         "profile.GetInfoResponseDto": {
             "type": "object",
             "properties": {
+                "action": {
+                    "$ref": "#/definitions/profile.ReferenceDto"
+                },
                 "age": {
                     "type": "integer"
                 },
@@ -922,9 +1034,6 @@ const docTemplate = `{
                     }
                 },
                 "sex": {
-                    "$ref": "#/definitions/profile.ReferenceDto"
-                },
-                "action": {
                     "$ref": "#/definitions/profile.ReferenceDto"
                 },
                 "type_of_dating": {
