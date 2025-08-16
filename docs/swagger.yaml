@@ -63,6 +63,15 @@ definitions:
       sex_id:
         type: integer
     type: object
+  like.LikeDto:
+    properties:
+      id:
+        type: integer
+      target_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
   model.Interest:
     properties:
       id:
@@ -72,6 +81,8 @@ definitions:
     type: object
   profile.GetInfoResponseDto:
     properties:
+      action:
+        $ref: '#/definitions/profile.ReferenceDto'
       age:
         type: integer
       attitude_to_alcohol:
@@ -105,8 +116,6 @@ definitions:
           type: string
         type: array
       sex:
-        $ref: '#/definitions/profile.ReferenceDto'
-      status:
         $ref: '#/definitions/profile.ReferenceDto'
       type_of_dating:
         $ref: '#/definitions/profile.ReferenceDto'
@@ -341,6 +350,68 @@ paths:
       summary: Обновление фильтра поиска
       tags:
       - Filters
+  /like/{target_id}:
+    post:
+      consumes:
+      - application/json
+      description: Текущий авторизованный пользователь ставит лайк другому пользователю.
+        Если лайк взаимный, создается мэтч.
+      parameters:
+      - description: ID пользователя, которого нужно лайкнуть
+        in: path
+        name: target_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created - Лайк успешно создан
+          schema:
+            type: string
+        "400":
+          description: Неверный ID пользователя в URL
+          schema:
+            type: string
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Создать лайк
+      tags:
+      - Likes
+  /like/all:
+    get:
+      description: Возвращает список всех лайков, поставленных текущим авторизованным
+        пользователем.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список лайков
+          schema:
+            items:
+              $ref: '#/definitions/like.LikeDto'
+            type: array
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Получить список своих лайков
+      tags:
+      - Likes
   /photo/{id}/all:
     get:
       description: Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.

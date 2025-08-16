@@ -7,6 +7,7 @@ import (
 	"dating_service/internal/auth"
 	"dating_service/internal/cache"
 	"dating_service/internal/filter"
+	"dating_service/internal/like"
 	"dating_service/internal/photo"
 	"dating_service/internal/profile"
 	"dating_service/internal/recommendations"
@@ -55,6 +56,7 @@ func main() {
 	photoRepository := photo.NewPhotoRepository(db)
 	filterRepository := filter.NewFilterRepository(db)
 	actionsRepository := action.NewActionsRepository(db)
+	likeRepository := like.NewLikeRepository(db)
 	//service
 	authService := auth.NewAuthService(userRepository, refCache, tokenGenerator)
 	profileService := profile.NewProfileService(userRepository, photoRepository, refCache)
@@ -62,6 +64,7 @@ func main() {
 	filterService := filter.NewFilterService(filterRepository)
 	recommendationService := recommendations.NewRecommendationService(userRepository, filterRepository)
 	actionService := action.NewActionsService(userRepository, actionsRepository)
+	likeService := like.NewLikeService(likeRepository, userRepository)
 	//background tasks
 	go func() {
 		ticker := time.NewTicker(24 * time.Hour)
@@ -79,6 +82,7 @@ func main() {
 	photo.NewPhotoHandler(protectedRouter, photoService)
 	filter.NewFilterHandler(protectedRouter, filterService)
 	recommendations.NewRecommendationHandler(protectedRouter, recommendationService)
+	like.NewLikeHandler(protectedRouter, likeService)
 	//middlewares
 	authMiddleware := middleware.NewAuthMiddleware(*config)
 	checkBlockedUserMiddleware := middleware.NewCheckBlockedUserMiddleware(userRepository)
