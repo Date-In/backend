@@ -358,6 +358,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/matches/all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает список всех мэтчей, в которых участвует текущий авторизованный пользователь.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Получить все мэтчи пользователя",
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ со списком мэтчей",
+                        "schema": {
+                            "$ref": "#/definitions/match.GetAllDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/photo/{id}/all": {
             "get": {
                 "description": "Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.",
@@ -964,6 +1001,31 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "match.GetAllDto": {
+            "type": "object",
+            "properties": {
+                "matches": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/match.MatchDto"
+                    }
+                }
+            }
+        },
+        "match.MatchDto": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "user1_id": {
+                    "type": "integer"
+                },
+                "user2_id": {
                     "type": "integer"
                 }
             }

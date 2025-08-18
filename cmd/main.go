@@ -6,8 +6,10 @@ import (
 	"dating_service/internal/action"
 	"dating_service/internal/auth"
 	"dating_service/internal/cache"
+	"dating_service/internal/chat"
 	"dating_service/internal/filter"
 	"dating_service/internal/like"
+	"dating_service/internal/match"
 	"dating_service/internal/photo"
 	"dating_service/internal/profile"
 	"dating_service/internal/recommendations"
@@ -57,6 +59,8 @@ func main() {
 	filterRepository := filter.NewFilterRepository(db)
 	actionsRepository := action.NewActionsRepository(db)
 	likeRepository := like.NewLikeRepository(db)
+	matchRepository := match.NewMatchRepository(db)
+	chatRepository := chat.NewChatRepository(db)
 	//service
 	authService := auth.NewAuthService(userRepository, refCache, tokenGenerator)
 	profileService := profile.NewProfileService(userRepository, photoRepository, refCache)
@@ -64,7 +68,8 @@ func main() {
 	filterService := filter.NewFilterService(filterRepository)
 	recommendationService := recommendations.NewRecommendationService(userRepository, filterRepository)
 	actionService := action.NewActionsService(userRepository, actionsRepository)
-	likeService := like.NewLikeService(likeRepository, userRepository)
+	likeService := like.NewLikeService(likeRepository, userRepository, matchRepository)
+	matchService := match.NewMatchService(matchRepository)
 	//background tasks
 	go func() {
 		ticker := time.NewTicker(24 * time.Hour)
@@ -83,6 +88,8 @@ func main() {
 	filter.NewFilterHandler(protectedRouter, filterService)
 	recommendations.NewRecommendationHandler(protectedRouter, recommendationService)
 	like.NewLikeHandler(protectedRouter, likeService)
+	match.NewMatchHandler(protectedRouter, matchService)
+	chat.NewChatHandler(publicRouter, chatRepository, config)
 	//middlewares
 	authMiddleware := middleware.NewAuthMiddleware(*config)
 	checkBlockedUserMiddleware := middleware.NewCheckBlockedUserMiddleware(userRepository)
@@ -99,6 +106,7 @@ func main() {
 	//routing
 	mainRouter.Handle("/auth/", publicRouter)
 	mainRouter.Handle("/swagger/", publicRouter)
+	mainRouter.Handle("/chat/", publicRouter)
 	mainRouter.Handle("/", protectedStackMiddleware(protectedRouter))
 	//start-server
 	server := http.Server{

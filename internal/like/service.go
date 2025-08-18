@@ -1,18 +1,19 @@
 package like
 
 import (
+	"dating_service/internal/match"
 	"dating_service/internal/model"
 	"dating_service/internal/user"
-	"errors"
 )
 
 type LikeService struct {
-	repo           *LikeRepository
-	userRepository *user.UserRepository
+	repo            *LikeRepository
+	userRepository  *user.UserRepository
+	matchRepository *match.MatchRepository
 }
 
-func NewLikeService(repo *LikeRepository, userRepository *user.UserRepository) *LikeService {
-	return &LikeService{repo, userRepository}
+func NewLikeService(repo *LikeRepository, userRepository *user.UserRepository, matchRepository *match.MatchRepository) *LikeService {
+	return &LikeService{repo, userRepository, matchRepository}
 }
 
 func (service *LikeService) CreateLike(userId, targetId uint) error {
@@ -40,8 +41,10 @@ func (service *LikeService) CreateLike(userId, targetId uint) error {
 		return err
 	}
 	if found != nil {
-		//логика создания мэтча
-		return errors.New("like created")
+		err = service.matchRepository.Create(userId, targetId)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

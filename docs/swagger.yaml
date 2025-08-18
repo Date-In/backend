@@ -72,6 +72,22 @@ definitions:
       user_id:
         type: integer
     type: object
+  match.GetAllDto:
+    properties:
+      matches:
+        items:
+          $ref: '#/definitions/match.MatchDto'
+        type: array
+    type: object
+  match.MatchDto:
+    properties:
+      id:
+        type: integer
+      user1_id:
+        type: integer
+      user2_id:
+        type: integer
+    type: object
   model.Interest:
     properties:
       id:
@@ -412,6 +428,30 @@ paths:
       summary: Получить список своих лайков
       tags:
       - Likes
+  /matches/all:
+    get:
+      description: Возвращает список всех мэтчей, в которых участвует текущий авторизованный
+        пользователь.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ со списком мэтчей
+          schema:
+            $ref: '#/definitions/match.GetAllDto'
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Получить все мэтчи пользователя
+      tags:
+      - Matches
   /photo/{id}/all:
     get:
       description: Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.
