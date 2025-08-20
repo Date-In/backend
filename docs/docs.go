@@ -91,6 +91,68 @@ const docTemplate = `{
                 }
             }
         },
+        "/chat/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает постраничный список сообщений для указанного чата (матча).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Получить историю сообщений для чата",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID чата (матча)",
+                        "name": "match_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество сообщений для загрузки",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ с массивом сообщений",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос (некорректные параметры)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/filter": {
             "get": {
                 "security": [
@@ -397,6 +459,11 @@ const docTemplate = `{
         },
         "/photo/{id}/all": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.",
                 "produces": [
                     "application/json"
@@ -441,6 +508,11 @@ const docTemplate = `{
         },
         "/photo/{uuid}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращает бинарные данные фотографии по её UUID",
                 "produces": [
                     "image/*"
@@ -1203,7 +1275,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8081",
+	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "API для Сервиса Знакомств",

@@ -96,7 +96,7 @@ func (s *ChatHandler) ServeWs() http.HandlerFunc {
 // @Produce      json
 // @Param        match_id  query     uint  true  "ID чата (матча)"
 // @Param        limit     query     int   true  "Количество сообщений для загрузки"
-// @Success      200       {array}   model.Message "Успешный ответ с массивом сообщений"
+// @Success      200       {array}   string "Успешный ответ с массивом сообщений"
 // @Failure      400       {string}  string        "Неверный запрос (некорректные параметры)"
 // @Failure      401       {string}  string        "Пользователь не авторизован"
 // @Failure      500       {string}  string        "Внутренняя ошибка сервера"
