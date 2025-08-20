@@ -11,13 +11,14 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main ./cmd/main.go
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/migrate ./cmd/migrate/main.go
 
-
 FROM alpine:latest
 
 WORKDIR /app
 
 COPY --from=builder /app/main .
 COPY --from=builder /app/migrate .
+
+COPY --from=builder /app/oas.yaml .
 
 EXPOSE 8081
 
