@@ -33,8 +33,8 @@ import (
 // @LicenseName Apache 2.0
 // @LicenseUrl http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @Server http://localhost:8081 "Локальный сервер для разработки"
-// @Server https://185.61.254.35:8081 "Тестовый стенд (Staging)"
+// @Server http://localhost:8081 Локальный сервер для разработки
+// @Server http://185.61.254.35:8081 Документация
 
 // @Security AuthorizationHeader read write
 // @SecurityScheme AuthorizationHeader http bearer Input your token
