@@ -1,0 +1,1319 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API для Сервиса Знакомств",
+    "description": "Это серверная часть для приложения знакомств. Все эндпоинты, требующие авторизации, ожидают JWT токен в заголовке 'Authorization: Bearer {token}'.",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "name": "Ваше Имя",
+      "email": "ваш.email@example.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8081",
+      "description": " \"Локальный сервер для разработки\""
+    },
+    {
+      "url": "https://185.61.254.35:8081",
+      "description": " \"Тестовый стенд (Staging)\""
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "eyJhbGciOiJIU...",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Вход пользователя в систему",
+        "description": " Аутентифицирует пользователя и возвращает JWT токен в теле ответа как обычный текст (plain text)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "JWT токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Регистрация нового пользователя",
+        "description": " Создает нового пользователя и возвращает JWT токен для доступа к защищенным ресурсам",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequestDto"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/chat/history": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Успешный ответ с массивом сообщений",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверный запрос (некорректные параметры)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Получить историю сообщений для чата",
+        "description": " Возвращает постраничный список сообщений для указанного чата (матча).",
+        "parameters": [
+          {
+            "name": "match_id",
+            "in": "query",
+            "description": "ID чата (матча)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "description": "ID чата (матча)"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Количество сообщений для загрузки",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Количество сообщений для загрузки"
+            }
+          }
+        ]
+      }
+    },
+    "/filter": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Успешный ответ с данными фильтра",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFilterDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Фильтр для данного пользователя не найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Filters"
+        ],
+        "summary": "Получение фильтра поиска",
+        "description": " Возвращает текущие настройки фильтра поиска для аутентифицированного пользователя."
+      }
+    },
+    "/filter/create": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Фильтр успешно создан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные данные запроса",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Filters"
+        ],
+        "summary": "Создание фильтра поиска",
+        "description": " Создает новый фильтр поиска для текущего аутентифицированного пользователя.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFilterDto"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/filter/update": {
+      "patch": {
+        "responses": {
+          "200": {
+            "description": "Фильтр успешно обновлен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные данные запроса",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Фильтр не найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Filters"
+        ],
+        "summary": "Обновление фильтра поиска",
+        "description": " Обновляет существующий фильтр поиска для текущего пользователя. Позволяет частичное обновление: можно передать только те поля, которые нужно изменить.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFilterDto"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/like/all": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Список лайков",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Likes"
+        ],
+        "summary": "Получить список своих лайков",
+        "description": " Возвращает список всех лайков, поставленных текущим авторизованным пользователем."
+      }
+    },
+    "/like/{target_id}": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Created - Лайк успешно создан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверный ID пользователя в URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Likes"
+        ],
+        "summary": "Создать лайк",
+        "description": " Текущий авторизованный пользователь ставит лайк другому пользователю. Если лайк взаимный, создается мэтч.",
+        "parameters": [
+          {
+            "name": "target_id",
+            "in": "path",
+            "description": "ID пользователя, которого нужно лайкнуть",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "description": "ID пользователя, которого нужно лайкнуть"
+            }
+          }
+        ]
+      }
+    },
+    "/matches/all": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Успешный ответ со списком мэтчей",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Получить все мэтчи пользователя",
+        "description": " Возвращает список всех мэтчей, в которых участвует текущий авторизованный пользователь."
+      }
+    },
+    "/photo/{id}/all": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Массив ссылок на фотографии",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный ID пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Photo"
+        ],
+        "summary": "Получить все ссылки на фото пользователя",
+        "description": " Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID Пользователя",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "description": "ID Пользователя"
+            }
+          }
+        ]
+      }
+    },
+    "/photo/{uuid}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Бинарные данные файла фотографии\" // \u003c--- ИЗМЕНЕНИЕ ЗДЕСЬ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос (UUID не указан)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Фотография не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Photo"
+        ],
+        "summary": "Получить файл фотографии",
+        "description": " Возвращает бинарные данные фотографии по её UUID",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "UUID фотографии",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID фотографии"
+            }
+          }
+        ]
+      }
+    },
+    "/profile": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Информация о профиле",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInfoResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Пользователь не найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Получение информации о профиле",
+        "description": " Возвращает данные профиля текущего пользователя"
+      },
+      "patch": {
+        "responses": {
+          "200": {
+            "description": "Информация о профиле",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInfoResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Обновить данные о профиле",
+        "description": " Возвращает данные профиля текущего пользователя",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInfoRequestDto"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/profile/avatar": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "ID аватара пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - пользователь не авторизован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - аватар не установлен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Получить аватар пользователя",
+        "description": " Возвращает ID текущего аватара авторизованного пользователя"
+      }
+    },
+    "/profile/interests": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Список интересов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Interest"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Обновить данные об интересах",
+        "description": " Возвращает данные профиля текущего пользователя",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInterestRequestDto"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/profile/photo/change-avatar/{photoId}": {
+      "patch": {
+        "responses": {
+          "200": {
+            "description": "JSON-объект с ID нового аватара",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Фотография не найдена или не принадлежит пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Обновление аватара пользователя",
+        "description": " Устанавливает указанную фотографию как аватар пользователя. Только фотографии, принадлежащие пользователю, могут быть установлены как аватар.",
+        "parameters": [
+          {
+            "name": "photoId",
+            "in": "path",
+            "description": "UUID фотографии для установки как аватар",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID фотографии для установки как аватар"
+            }
+          }
+        ]
+      }
+    },
+    "/profile/photo/{photoId}": {
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "No Content - фотография успешно удалена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Фотография не найдена или нет прав на удаление",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Удаление фотографии пользователя",
+        "description": " Удаляет фотографию, принадлежащую текущему авторизованному пользователю.",
+        "parameters": [
+          {
+            "name": "photoId",
+            "in": "path",
+            "description": "UUID фотографии для удаления",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID фотографии для удаления"
+            }
+          }
+        ]
+      }
+    },
+    "/profile/photos": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "UUID созданной фотографии",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос (например, файл не предоставлен)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Пользователь не найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Достигнут лимит на количество фотографий",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Добавить фотографию в профиль",
+        "description": " Загружает файл фотографии для текущего пользователя. Принимает multipart/form-data с ключом \"photo\"."
+      }
+    },
+    "/recommendations": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Успешный ответ со списком рекомендованных пользователей",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoredUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный формат параметров пагинации",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Текущий пользователь или его фильтр не найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Recommendations"
+        ],
+        "summary": "Получение списка рекомендаций",
+        "description": " Возвращает отсортированный по релевантности (match score) список пользователей. Параметры пагинации передаются через query-параметры в URL.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Номер страницы. По умолчанию: 1",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Номер страницы. По умолчанию: 1"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Количество элементов на странице. По умолчанию: 20",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Количество элементов на странице. По умолчанию: 20"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateFilterDto": {
+        "type": "object",
+        "properties": {
+          "min_age": {
+            "type": "integer"
+          },
+          "max_age": {
+            "type": "integer"
+          },
+          "sex_id": {
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          }
+        }
+      },
+      "GetAllDto": {
+        "type": "object",
+        "properties": {
+          "matches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "user1_id": {
+                  "type": "integer"
+                },
+                "user2_id": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetFilterDto": {
+        "type": "object",
+        "properties": {
+          "min_age": {
+            "type": "integer"
+          },
+          "max_age": {
+            "type": "integer"
+          },
+          "sex_id": {
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          }
+        }
+      },
+      "GetInfoResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "children": {
+            "type": "boolean"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "sex": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "zodiac_sign": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "worldview": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "type_of_dating": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "education": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "attitude_to_alcohol": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "attitude_to_smoking": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "action": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDto"
+            }
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "photo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Interest": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        }
+      },
+      "LikeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "target_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "LoginRequestDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "MatchDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "user1_id": {
+            "type": "integer"
+          },
+          "user2_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "ReferenceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterRequestDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer"
+          },
+          "sex_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "ScoredUser": {
+        "type": "object",
+        "properties": {
+          "UserID": {
+            "type": "integer"
+          },
+          "Score": {
+            "type": "number"
+          }
+        }
+      },
+      "UpdateFilterDto": {
+        "type": "object",
+        "properties": {
+          "min_age": {
+            "type": "integer"
+          },
+          "max_age": {
+            "type": "integer"
+          },
+          "sex_id": {
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateInfoRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "children": {
+            "type": "boolean"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "sex_id": {
+            "type": "integer"
+          },
+          "zodiac_sign_id": {
+            "type": "integer"
+          },
+          "worldview_id": {
+            "type": "integer"
+          },
+          "type_of_dating_id": {
+            "type": "integer"
+          },
+          "education_id": {
+            "type": "integer"
+          },
+          "attitude_to_alcohol_id": {
+            "type": "integer"
+          },
+          "attitude_to_smoking_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "UpdateInterestRequestDto": {
+        "type": "object",
+        "properties": {
+          "interests": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "AuthorizationHeader": {
+        "type": "http",
+        "description": "Input your token",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [
+    {
+      "AuthorizationHeader": [
+        "read",
+        "write"
+      ]
+    }
+  ]
+}

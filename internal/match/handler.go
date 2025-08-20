@@ -16,15 +16,14 @@ func NewMatchHandler(router *http.ServeMux, service *MatchService) {
 }
 
 // GetAll godoc
-// @Summary      Получить все мэтчи пользователя
+// @Title        Получить все мэтчи пользователя
 // @Description  Возвращает список всех мэтчей, в которых участвует текущий авторизованный пользователь.
-// @Tags         Matches
-// @Produce      json
-// @Success      200  {object}  GetAllDto "Успешный ответ со списком мэтчей"
-// @Failure      401  {string}  string    "Пользователь не авторизован"
-// @Failure      500  {string}  string    "Внутренняя ошибка сервера"
-// @Security     ApiKeyAuth
-// @Router       /matches/all [get]
+// @Success      200 {object} GetAllDto "Успешный ответ со списком мэтчей"
+// @Failure      401 {string} string "Пользователь не авторизован"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Matches
+// @Route        /matches/all [get]
 func (handler *MatchHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)

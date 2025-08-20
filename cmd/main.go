@@ -2,7 +2,6 @@ package main
 
 import (
 	"dating_service/configs"
-	_ "dating_service/docs"
 	"dating_service/internal/action"
 	"dating_service/internal/auth"
 	"dating_service/internal/cache"
@@ -23,20 +22,22 @@ import (
 	"time"
 )
 
-// @title API для Сервиса Знакомств
-// @version 1.0
-// @description Это серверная часть для приложения знакомств. Все эндпоинты, требующие авторизации, ожидают JWT токен в заголовке 'Authorization: Bearer {token}'.
-// @termsOfService http://swagger.io/terms/
+// @Title API для Сервиса Знакомств
+// @Version 1.0
+// @Description Это серверная часть для приложения знакомств. Все эндпоинты, требующие авторизации, ожидают JWT токен в заголовке 'Authorization: Bearer {token}'.
+// @TermsOfServiceUrl http://swagger.io/terms/
 
-// @contact.name Ваше Имя
-// @contact.email ваш.email@example.com
+// @ContactName Ваше Имя
+// @ContactEmail ваш.email@example.com
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @LicenseName Apache 2.0
+// @LicenseUrl http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
+// @Server http://localhost:8081 "Локальный сервер для разработки"
+// @Server https://185.61.254.35:8081 "Тестовый стенд (Staging)"
+
+// @Security AuthorizationHeader read write
+// @SecurityScheme AuthorizationHeader http bearer Input your token
 func main() {
 	now := time.Now()
 	config := configs.NewConfig()
@@ -78,7 +79,11 @@ func main() {
 		}
 	}()
 	//handler-public
-	publicRouter.HandleFunc("/swagger/", httpSwagger.WrapHandler)
+	fileServer := http.FileServer(http.Dir("./"))
+	publicRouter.Handle("/swagger/oas.yaml", http.StripPrefix("/swagger/", fileServer))
+	publicRouter.HandleFunc("/swagger/", httpSwagger.Handler(
+		httpSwagger.URL("/swagger/oas.yaml"),
+	))
 	auth.NewAuthHandler(publicRouter, authService)
 	//handler-protected
 	profile.NewProfileHandler(protectedRouter, profileService)

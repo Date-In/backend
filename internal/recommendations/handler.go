@@ -18,18 +18,17 @@ func NewRecommendationHandler(router *http.ServeMux, service *RecommendationServ
 }
 
 // GetRecommendations godoc
-// @Summary      Получение списка рекомендаций
+// @Title        Получение списка рекомендаций
 // @Description  Возвращает отсортированный по релевантности (match score) список пользователей. Параметры пагинации передаются через query-параметры в URL.
-// @Tags         Recommendations
-// @Security     ApiKeyAuth
-// @Produce      json
-// @Param        page      query     int  false  "Номер страницы. По умолчанию: 1"
-// @Param        pageSize  query     int  false  "Количество элементов на странице. По умолчанию: 20"
-// @Success      200       {array}   ScoredUser            "Успешный ответ со списком рекомендованных пользователей"
-// @Failure      400       {object}  map[string]string     "Некорректный формат параметров пагинации"
-// @Failure      404       {object}  map[string]string     "Текущий пользователь или его фильтр не найден"
-// @Failure      500       {object}  map[string]string     "Внутренняя ошибка сервера"
-// @Router       /recommendations [get]
+// @Param        page query int false "Номер страницы. По умолчанию: 1"
+// @Param        pageSize query int false "Количество элементов на странице. По умолчанию: 20"
+// @Success      200 {object} ScoredUser "Успешный ответ со списком рекомендованных пользователей"
+// @Failure      400 {string} string "Некорректный формат параметров пагинации"
+// @Failure      404 {string} string "Текущий пользователь или его фильтр не найден"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Recommendations
+// @Route        /recommendations [get]
 func (handler *RecommendationHandler) GetRecommendations() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
