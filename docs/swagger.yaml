@@ -193,7 +193,6 @@ definitions:
       userID:
         type: integer
     type: object
-host: localhost:8081
 info:
   contact:
     email: ваш.email@example.com
@@ -253,6 +252,46 @@ paths:
       summary: Регистрация нового пользователя
       tags:
       - Authentication
+  /chat/history:
+    get:
+      description: Возвращает постраничный список сообщений для указанного чата (матча).
+      parameters:
+      - description: ID чата (матча)
+        in: query
+        name: match_id
+        required: true
+        type: integer
+      - description: Количество сообщений для загрузки
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с массивом сообщений
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Неверный запрос (некорректные параметры)
+          schema:
+            type: string
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить историю сообщений для чата
+      tags:
+      - Chat
   /filter:
     get:
       description: Возвращает текущие настройки фильтра поиска для аутентифицированного
@@ -478,6 +517,8 @@ paths:
           description: Внутренняя ошибка сервера
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Получить все ссылки на фото пользователя
       tags:
       - Photo
@@ -509,6 +550,8 @@ paths:
           description: Внутренняя ошибка сервера
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Получить файл фотографии
       tags:
       - Photo

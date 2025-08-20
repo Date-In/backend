@@ -28,6 +28,7 @@ func NewPhotoHandler(router *http.ServeMux, service *PhotoService) {
 // @Failure      400 {string} string "Некорректный запрос (UUID не указан)"
 // @Failure      404 {string} string "Фотография не найдена"
 // @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     ApiKeyAuth
 // @Router       /photo/{uuid} [get]
 func (h *PhotoHandler) GetPhoto() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -61,6 +62,7 @@ func (h *PhotoHandler) GetPhoto() http.HandlerFunc {
 // @Success      200 {array} string "Массив ссылок на фотографии"
 // @Failure      400 {string} string "Некорректный ID пользователя"
 // @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     ApiKeyAuth
 // @Router       /photo/{id}/all [get]
 func (h *PhotoHandler) GetAllUserPhotos() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

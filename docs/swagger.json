@@ -14,7 +14,6 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8081",
     "paths": {
         "/auth/login": {
             "post": {
@@ -77,6 +76,68 @@
                 "responses": {
                     "201": {
                         "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает постраничный список сообщений для указанного чата (матча).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Получить историю сообщений для чата",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID чата (матча)",
+                        "name": "match_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество сообщений для загрузки",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ с массивом сообщений",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос (некорректные параметры)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "type": "string"
                         }
@@ -390,6 +451,11 @@
         },
         "/photo/{id}/all": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.",
                 "produces": [
                     "application/json"
@@ -434,6 +500,11 @@
         },
         "/photo/{uuid}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращает бинарные данные фотографии по её UUID",
                 "produces": [
                     "image/*"
