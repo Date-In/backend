@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"dating_service/configs"
 	"dating_service/internal/action"
 	"dating_service/internal/auth"
 	"dating_service/internal/cache"
 	"dating_service/internal/chat"
+	"dating_service/internal/filestorage"
 	"dating_service/internal/filter"
 	"dating_service/internal/like"
 	"dating_service/internal/match"
@@ -43,6 +45,9 @@ func main() {
 	config := configs.NewConfig()
 	tokenGenerator := JWT.NewJWT(config.SecretToken.Token)
 	db := db2.NewDb(config)
+	photoS3Client := filestorage.NewS3Client(config)
+	ctx := context.Background()
+
 	//routers
 	mainRouter := http.NewServeMux()
 	publicRouter := http.NewServeMux()
@@ -61,9 +66,10 @@ func main() {
 	matchRepository := match.NewMatchRepository(db)
 	chatRepository := chat.NewChatRepository(db)
 	//service
+	photoS3Service := filestorage.NewS3FileStorage(photoS3Client, config)
+	photoService := photo.NewPhotoService(photoRepository, photoS3Service)
 	authService := auth.NewAuthService(userRepository, refCache, tokenGenerator)
-	profileService := profile.NewProfileService(userRepository, photoRepository, refCache)
-	photoService := photo.NewPhotoService(photoRepository)
+	profileService := profile.NewProfileService(userRepository, photoService, refCache)
 	filterService := filter.NewFilterService(filterRepository)
 	recommendationService := recommendations.NewRecommendationService(userRepository, filterRepository)
 	actionService := action.NewActionsService(userRepository, actionsRepository)
@@ -86,8 +92,7 @@ func main() {
 	))
 	auth.NewAuthHandler(publicRouter, authService)
 	//handler-protected
-	profile.NewProfileHandler(protectedRouter, profileService)
-	photo.NewPhotoHandler(protectedRouter, photoService)
+	profile.NewProfileHandler(protectedRouter, profileService, ctx)
 	filter.NewFilterHandler(protectedRouter, filterService)
 	recommendations.NewRecommendationHandler(protectedRouter, recommendationService)
 	like.NewLikeHandler(protectedRouter, likeService)

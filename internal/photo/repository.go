@@ -63,22 +63,21 @@ func (repo *PhotoRepository) FindAllIDs(userId uint) ([]string, error) {
 	return ids, nil
 }
 
-func (repo *PhotoRepository) FindAvatar(userId uint) (string, error) {
-	var avatarID string
+func (repo *PhotoRepository) FindAvatar(userId uint) (*model.Photo, error) {
+	var photo *model.Photo
 
 	err := repo.db.PgDb.Model(&model.Photo{}).
-		Select("id").
 		Where("user_id = ? AND is_avatar = ?", userId, true).
-		First(&avatarID).Error
+		First(&photo).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", nil
+			return nil, nil
 		}
-		return "", fmt.Errorf("failed to find avatar: %v", err)
+		return nil, fmt.Errorf("failed to find avatar: %v", err)
 	}
 
-	return avatarID, nil
+	return photo, nil
 }
 
 func (repo *PhotoRepository) FindUserPhotoWithoutAvatar(userId uint) ([]string, error) {

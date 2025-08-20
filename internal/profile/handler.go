@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"context"
 	"dating_service/pkg/req"
 	"dating_service/pkg/res"
 	"dating_service/pkg/utilits"
@@ -12,10 +13,11 @@ import (
 
 type ProfileHandler struct {
 	service *ProfileService
+	ctx     context.Context
 }
 
-func NewProfileHandler(router *http.ServeMux, service *ProfileService) {
-	handler := &ProfileHandler{service: service}
+func NewProfileHandler(router *http.ServeMux, service *ProfileService, ctx context.Context) {
+	handler := &ProfileHandler{service: service, ctx: ctx}
 	router.Handle("GET /profile", handler.GetInfo())
 	router.Handle("PATCH /profile", handler.UpdateProfile())
 	router.Handle("PUT /profile/interests", handler.UpdateInterests())
@@ -140,7 +142,7 @@ func (handler *ProfileHandler) UpdateInterests() http.HandlerFunc {
 // AddPhoto godoc
 // @Title        Добавить фотографию в профиль
 // @Description  Загружает файл фотографии для текущего пользователя. Принимает multipart/form-data с ключом "photo".
-// @Param        photo formData file true "Файл фотографии для загрузки"
+// @Param        photo file file true "Файл фотографии для загрузки"
 // @Success      201 {string} string "UUID созданной фотографии"
 // @Failure      400 {string} string "Некорректный запрос (например, файл не предоставлен)"
 // @Failure      401 {string} string "Пользователь не авторизован"
@@ -170,7 +172,7 @@ func (handler *ProfileHandler) AddPhoto() http.HandlerFunc {
 			return
 		}
 
-		photoID, err := handler.service.AddPhoto(fileHeader.Filename, fileHeader.Header.Get("Content-Type"), data, userID)
+		photoID, err := handler.service.AddPhoto(handler.ctx, userID, data, fileHeader.Filename)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrLimitPhoto):
@@ -202,7 +204,7 @@ func (handler *ProfileHandler) DeletePhoto() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		photoID := r.PathValue("photoId")
 		userID := utilits.GetIdContext(w, r)
-		err := handler.service.DeletePhoto(photoID, userID)
+		err := handler.service.DeletePhoto(handler.ctx, photoID, userID)
 		if err != nil {
 			if errors.Is(err, ErrPhotoNotFound) {
 				http.Error(w, err.Error(), http.StatusNotFound)

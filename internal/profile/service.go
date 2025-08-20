@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"context"
 	"dating_service/internal/cache"
 	"dating_service/internal/model"
 	"dating_service/internal/photo"
@@ -11,13 +12,13 @@ import (
 )
 
 type ProfileService struct {
-	repo            *user.UserRepository
-	photoRepository *photo.PhotoRepository
-	cache           cache.IReferenceCache
+	repo         *user.UserRepository
+	photoService *photo.PhotoService
+	cache        cache.IReferenceCache
 }
 
-func NewProfileService(repo *user.UserRepository, photoRepo *photo.PhotoRepository, cache cache.IReferenceCache) *ProfileService {
-	return &ProfileService{repo, photoRepo, cache}
+func NewProfileService(repo *user.UserRepository, photoService *photo.PhotoService, cache cache.IReferenceCache) *ProfileService {
+	return &ProfileService{repo, photoService, cache}
 }
 
 func (service *ProfileService) GetInfo(id uint) (*model.User, error) {
@@ -149,8 +150,8 @@ func (service *ProfileService) UpdateInterests(userID uint, interestIDs []uint) 
 	return updatedUser.Interests, nil
 }
 
-func (service *ProfileService) AddPhoto(fileName, fileType string, data []byte, userID uint) (*string, error) {
-	count, err := service.photoRepository.CountPhoto(userID)
+func (service *ProfileService) AddPhoto(ctx context.Context, userID uint, data []byte, fileName string) (*model.Photo, error) {
+	count, err := service.photoService.CountPhoto(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrUserNotFound
@@ -160,16 +161,15 @@ func (service *ProfileService) AddPhoto(fileName, fileType string, data []byte, 
 	if count >= 5 {
 		return nil, ErrLimitPhoto
 	}
-	photo := model.NewPhoto(fileName, fileType, data, userID)
-	err = service.photoRepository.Save(photo)
+	addPhoto, err := service.photoService.AddPhoto(ctx, userID, data, fileName)
 	if err != nil {
 		return nil, err
 	}
-	return &photo.ID, nil
+	return addPhoto, nil
 }
 
-func (service *ProfileService) DeletePhoto(photoId string, userId uint) error {
-	rowsAffected, err := service.photoRepository.DeleteById(photoId, userId)
+func (service *ProfileService) DeletePhoto(ctx context.Context, photoId string, userId uint) error {
+	rowsAffected, err := service.photoService.DeletePhoto(ctx, photoId, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ErrPhotoNotFound
@@ -183,7 +183,7 @@ func (service *ProfileService) DeletePhoto(photoId string, userId uint) error {
 }
 
 func (service *ProfileService) UpdateAvatar(photoId string, userID uint) (string, error) {
-	newAvatarId, err := service.photoRepository.ChangeAvatarUser(userID, photoId)
+	newAvatarId, err := service.photoService.ChangeAvatarUser(photoId, userID)
 	if err != nil {
 		return "", err
 	}
@@ -191,11 +191,11 @@ func (service *ProfileService) UpdateAvatar(photoId string, userID uint) (string
 }
 
 func (service *ProfileService) GetAvatar(userID uint) (string, error) {
-	avatarId, err := service.photoRepository.FindAvatar(userID)
+	avatarUrl, err := service.photoService.FindAvatar(userID)
 	if err != nil {
 		return "", err
 	}
-	return "http://localhost:8081/photo/" + avatarId, nil
+	return avatarUrl, nil
 }
 
 func PreloadCache(user *model.User, c cache.IReferenceCache) {
