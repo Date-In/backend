@@ -20,17 +20,15 @@ func NewFilterHandler(router *http.ServeMux, service *FilterService) {
 }
 
 // CreateFilter godoc
-// @Summary      Создание фильтра поиска
+// @Title        Создание фильтра поиска
 // @Description  Создает новый фильтр поиска для текущего аутентифицированного пользователя.
-// @Tags         Filters
-// @Security     ApiKeyAuth
-// @Accept       json
-// @Produce      json
-// @Param        filterData   body      CreateFilterDto     true  "Данные для создания фильтра"
-// @Success      201          {object}  map[string]string   "Фильтр успешно создан"
-// @Failure      400          {object}  map[string]string   "Некорректные данные запроса"
-// @Failure      500          {object}  map[string]string   "Внутренняя ошибка сервера"
-// @Router       /filter/create [post]
+// @Param        filterData body CreateFilterDto true "Данные для создания фильтра"
+// @Success      201 {string} string "Фильтр успешно создан"
+// @Failure      400 {string} string "Некорректные данные запроса"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Filters
+// @Route        /filter/create [post]
 func (handler *FilterHandler) CreateFilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
@@ -56,18 +54,16 @@ func (handler *FilterHandler) CreateFilter() http.HandlerFunc {
 }
 
 // UpdateFilter godoc
-// @Summary      Обновление фильтра поиска
+// @Title        Обновление фильтра поиска
 // @Description  Обновляет существующий фильтр поиска для текущего пользователя. Позволяет частичное обновление: можно передать только те поля, которые нужно изменить.
-// @Tags         Filters
-// @Security     ApiKeyAuth
-// @Accept       json
-// @Produce      json
-// @Param        filterUpdateData body      UpdateFilterDto     true  "Данные для обновления фильтра (можно передавать только изменяемые поля)"
-// @Success      200              {object}  map[string]string   "Фильтр успешно обновлен"
-// @Failure      400              {object}  map[string]string   "Некорректные данные запроса"
-// @Failure      404              {object}  map[string]string   "Фильтр не найден"
-// @Failure      500              {object}  map[string]string   "Внутренняя ошибка сервера"
-// @Router       /filter/update [patch]
+// @Param        filterUpdateData body UpdateFilterDto true "Данные для обновления фильтра (можно передавать только изменяемые поля)"
+// @Success      200 {string} string "Фильтр успешно обновлен"
+// @Failure      400 {string} string "Некорректные данные запроса"
+// @Failure      404 {string} string "Фильтр не найден"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Filters
+// @Route        /filter/update [patch]
 func (handler *FilterHandler) UpdateFilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
@@ -92,15 +88,14 @@ func (handler *FilterHandler) UpdateFilter() http.HandlerFunc {
 }
 
 // GetFilter godoc
-// @Summary      Получение фильтра поиска
+// @Title        Получение фильтра поиска
 // @Description  Возвращает текущие настройки фильтра поиска для аутентифицированного пользователя.
-// @Tags         Filters
+// @Success      200 {object} GetFilterDto "Успешный ответ с данными фильтра"
+// @Failure      404 {string} string "Фильтр для данного пользователя не найден"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
 // @Security     ApiKeyAuth
-// @Produce      json
-// @Success      200  {object}  GetFilterDto        "Успешный ответ с данными фильтра"
-// @Failure      404  {object}  map[string]string   "Фильтр для данного пользователя не найден"
-// @Failure      500  {object}  map[string]string   "Внутренняя ошибка сервера"
-// @Router       /filter [get]
+// @Resource     Filters
+// @Route        /filter [get]
 func (handler *FilterHandler) GetFilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)

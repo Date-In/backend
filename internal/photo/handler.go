@@ -19,17 +19,16 @@ func NewPhotoHandler(router *http.ServeMux, service *PhotoService) {
 }
 
 // GetPhoto godoc
-// @Summary      Получить файл фотографии
+// @Title        Получить файл фотографии
 // @Description  Возвращает бинарные данные фотографии по её UUID
-// @Tags         Photo
-// @Produce      image/*
 // @Param        uuid path string true "UUID фотографии"
-// @Success      200 {file} file "Бинарные данные файла фотографии"
+// @Success      200 {string} binary "Бинарные данные файла фотографии" // <--- ИЗМЕНЕНИЕ ЗДЕСЬ
 // @Failure      400 {string} string "Некорректный запрос (UUID не указан)"
 // @Failure      404 {string} string "Фотография не найдена"
 // @Failure      500 {string} string "Внутренняя ошибка сервера"
-// @Security     ApiKeyAuth
-// @Router       /photo/{uuid} [get]
+// @Security     AuthorizationHeader
+// @Resource     Photo
+// @Route        /photo/{uuid} [get]
 func (h *PhotoHandler) GetPhoto() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		uuid := strings.TrimPrefix(r.URL.Path, "/photo/")
@@ -54,16 +53,15 @@ func (h *PhotoHandler) GetPhoto() http.HandlerFunc {
 }
 
 // GetAllUserPhotos godoc
-// @Summary      Получить все ссылки на фото пользователя
+// @Title        Получить все ссылки на фото пользователя
 // @Description  Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.
-// @Tags         Photo
-// @Produce      application/json
 // @Param        id path int true "ID Пользователя"
 // @Success      200 {array} string "Массив ссылок на фотографии"
 // @Failure      400 {string} string "Некорректный ID пользователя"
 // @Failure      500 {string} string "Внутренняя ошибка сервера"
-// @Security     ApiKeyAuth
-// @Router       /photo/{id}/all [get]
+// @Security     AuthorizationHeader
+// @Resource     Photo
+// @Route        /photo/{id}/all [get]
 func (h *PhotoHandler) GetAllUserPhotos() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userIdString := r.PathValue("id")

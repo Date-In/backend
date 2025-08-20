@@ -19,18 +19,16 @@ func NewLikeHandler(router *http.ServeMux, service *LikeService) {
 }
 
 // CreateLike godoc
-// @Summary      Создать лайк
+// @Title        Создать лайк
 // @Description  Текущий авторизованный пользователь ставит лайк другому пользователю. Если лайк взаимный, создается мэтч.
-// @Tags         Likes
-// @Accept       json
-// @Produce      json
-// @Param        target_id   path      int  true  "ID пользователя, которого нужно лайкнуть"
-// @Success      201  {string}  string  "Created - Лайк успешно создан"
-// @Failure      400  {string}  string  "Неверный ID пользователя в URL"
-// @Failure      401  {string}  string  "Пользователь не авторизован"
-// @Failure      500  {string}  string  "Внутренняя ошибка сервера"
-// @Security     ApiKeyAuth
-// @Router       /like/{target_id} [post]
+// @Param        target_id path int true "ID пользователя, которого нужно лайкнуть"
+// @Success      201 {string} string "Created - Лайк успешно создан"
+// @Failure      400 {string} string "Неверный ID пользователя в URL"
+// @Failure      401 {string} string "Пользователь не авторизован"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Likes
+// @Route        /like/{target_id} [post]
 func (handler *LikeHandler) CreateLike() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
@@ -54,15 +52,14 @@ func (handler *LikeHandler) CreateLike() http.HandlerFunc {
 }
 
 // GetLike godoc
-// @Summary      Получить список своих лайков
+// @Title        Получить список своих лайков
 // @Description  Возвращает список всех лайков, поставленных текущим авторизованным пользователем.
-// @Tags         Likes
-// @Produce      json
-// @Success      200  {array}   LikeDto "Список лайков"
-// @Failure      401  {string}  string  "Пользователь не авторизован"
-// @Failure      500  {string}  string  "Внутренняя ошибка сервера"
-// @Security     ApiKeyAuth
-// @Router       /like/all [get]
+// @Success      200 {object} LikeDto "Список лайков"
+// @Failure      401 {string} string "Пользователь не авторизован"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Likes
+// @Route        /like/all [get]
 func (handler *LikeHandler) GetLike() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)

@@ -90,18 +90,17 @@ func (s *ChatHandler) ServeWs() http.HandlerFunc {
 }
 
 // GetHistory godoc
-// @Summary      Получить историю сообщений для чата
+// @Title        Получить историю сообщений для чата
 // @Description  Возвращает постраничный список сообщений для указанного чата (матча).
-// @Tags         Chat
-// @Produce      json
-// @Param        match_id  query     uint  true  "ID чата (матча)"
-// @Param        limit     query     int   true  "Количество сообщений для загрузки"
-// @Success      200       {array}   string "Успешный ответ с массивом сообщений"
-// @Failure      400       {string}  string        "Неверный запрос (некорректные параметры)"
-// @Failure      401       {string}  string        "Пользователь не авторизован"
-// @Failure      500       {string}  string        "Внутренняя ошибка сервера"
-// @Security     BearerAuth
-// @Router       /chat/history [get]
+// @Param        match_id query uint true "ID чата (матча)"
+// @Param        limit query int true "Количество сообщений для загрузки"
+// @Success      200 {array} string "Успешный ответ с массивом сообщений"
+// @Failure      400 {string} string "Неверный запрос (некорректные параметры)"
+// @Failure      401 {string} string "Пользователь не авторизован"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Chat
+// @Route        /chat/history [get]
 func (s *ChatHandler) GetHistory() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		limitStr := r.URL.Query().Get("limit")

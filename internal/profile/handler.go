@@ -26,16 +26,14 @@ func NewProfileHandler(router *http.ServeMux, service *ProfileService) {
 }
 
 // GetInfo godoc
-// @Summary      Получение информации о профиле
+// @Title        Получение информации о профиле
 // @Description  Возвращает данные профиля текущего пользователя
-// @Tags         Profile
-// @Accept       json
-// @Produce      json
 // @Success      200 {object} GetInfoResponseDto "Информация о профиле"
 // @Failure      404 {string} string "Пользователь не найден"
 // @Failure      500 {string} string "Внутренняя ошибка сервера"
-// @Security     ApiKeyAuth
-// @Router       /profile [get]
+// @Security     AuthorizationHeader
+// @Resource     Profile
+// @Route        /profile [get]
 func (handler *ProfileHandler) GetInfo() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
@@ -54,15 +52,13 @@ func (handler *ProfileHandler) GetInfo() http.HandlerFunc {
 }
 
 // UpdateProfile godoc
-// @Summary      Обновить данные о профиле
+// @Title        Обновить данные о профиле
 // @Description  Возвращает данные профиля текущего пользователя
-// @Tags         Profile
-// @Accept       json
-// @Produce      json
-// @Param credentials  body      UpdateInfoRequestDto   true  "Данные для обновления"
+// @Param        credentials body UpdateInfoRequestDto true "Данные для обновления"
 // @Success      200 {object} GetInfoResponseDto "Информация о профиле"
-// @Security     ApiKeyAuth
-// @Router       /profile [patch]
+// @Security     AuthorizationHeader
+// @Resource     Profile
+// @Route        /profile [patch]
 func (handler *ProfileHandler) UpdateProfile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
@@ -113,15 +109,13 @@ func (handler *ProfileHandler) UpdateProfile() http.HandlerFunc {
 }
 
 // UpdateInterests godoc
-// @Summary      Обновить данные об интересах
+// @Title        Обновить данные об интересах
 // @Description  Возвращает данные профиля текущего пользователя
-// @Tags         Profile
-// @Accept       json
-// @Produce      json
-// @Param credentials  body      UpdateInterestRequestDto   true  "Данные для обновления"
-// @Success 200 {array} model.Interest "Список интересов"
-// @Security     ApiKeyAuth
-// @Router       /profile/interests [put]
+// @Param        credentials body UpdateInterestRequestDto true "Данные для обновления"
+// @Success      200 {object} model.Interest "Список интересов"
+// @Security     AuthorizationHeader
+// @Resource     Profile
+// @Route        /profile/interests [put]
 func (handler *ProfileHandler) UpdateInterests() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
@@ -144,11 +138,8 @@ func (handler *ProfileHandler) UpdateInterests() http.HandlerFunc {
 }
 
 // AddPhoto godoc
-// @Summary      Добавить фотографию в профиль
+// @Title        Добавить фотографию в профиль
 // @Description  Загружает файл фотографии для текущего пользователя. Принимает multipart/form-data с ключом "photo".
-// @Tags         Profile
-// @Accept       multipart/form-data
-// @Produce      text/plain
 // @Param        photo formData file true "Файл фотографии для загрузки"
 // @Success      201 {string} string "UUID созданной фотографии"
 // @Failure      400 {string} string "Некорректный запрос (например, файл не предоставлен)"
@@ -156,8 +147,9 @@ func (handler *ProfileHandler) UpdateInterests() http.HandlerFunc {
 // @Failure      404 {string} string "Пользователь не найден"
 // @Failure      409 {string} string "Достигнут лимит на количество фотографий"
 // @Failure      500 {string} string "Внутренняя ошибка сервера"
-// @Security     ApiKeyAuth
-// @Router       /profile/photos [post]
+// @Security     AuthorizationHeader
+// @Resource     Profile
+// @Route        /profile/photos [post]
 func (handler *ProfileHandler) AddPhoto() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
@@ -196,18 +188,16 @@ func (handler *ProfileHandler) AddPhoto() http.HandlerFunc {
 }
 
 // DeletePhoto godoc
-// @Summary      Удаление фотографии пользователя
-// @Description  Удаляет фотографию, принадлежащую текущему авторизованному пользователю.
-// @Tags         Profile
-// @Accept       json
-// @Produce      json
-// @Param        photoId   path      string  true  "UUID фотографии для удаления"
-// @Success      204  {string}  string  "No Content - фотография успешно удалена"
-// @Failure      401  {string}  string  "Пользователь не авторизован"
-// @Failure      404  {string}  string  "Фотография не найдена или нет прав на удаление"
-// @Failure      500  {string}  string  "Внутренняя ошибка сервера"
-// @Security     ApiKeyAuth
-// @Router       /profile/photo/{photoId} [delete]
+// @Title Удаление фотографии пользователя
+// @Description Удаляет фотографию, принадлежащую текущему авторизованному пользователю.
+// @Param photoId path string true "UUID фотографии для удаления"
+// @Success 204 {string} string "No Content - фотография успешно удалена"
+// @Failure 401 string string "Пользователь не авторизован"
+// @Failure 404 string string "Фотография не найдена или нет прав на удаление"
+// @Failure 500 string string "Внутренняя ошибка сервера"
+// @Security AuthorizationHeader
+// @Resource Profile
+// @Route /profile/photo/{photoId} [delete]
 func (handler *ProfileHandler) DeletePhoto() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		photoID := r.PathValue("photoId")
@@ -226,18 +216,16 @@ func (handler *ProfileHandler) DeletePhoto() http.HandlerFunc {
 }
 
 // UpdateAvatar godoc
-// @Summary      Обновление аватара пользователя
+// @Title        Обновление аватара пользователя
 // @Description  Устанавливает указанную фотографию как аватар пользователя. Только фотографии, принадлежащие пользователю, могут быть установлены как аватар.
-// @Tags         Profile
-// @Accept       json
-// @Produce      json
-// @Param        photoId   path      string  true  "UUID фотографии для установки как аватар"
-// @Success      200  {object}  string  "ID нового аватара"
-// @Failure      401  {string}  string  "Пользователь не авторизован"
-// @Failure      404  {string}  string  "Фотография не найдена или не принадлежит пользователю"
-// @Failure      500  {string}  string  "Внутренняя ошибка сервера"
-// @Security     ApiKeyAuth
-// @Router       /profile/photo/change-avatar/{photoId} [patch]
+// @Param        photoId path string true "UUID фотографии для установки как аватар"
+// @Success      200 {string} string "JSON-объект с ID нового аватара"
+// @Failure      401 string string "Пользователь не авторизован"
+// @Failure      404 string string "Фотография не найдена или не принадлежит пользователю"
+// @Failure      500 string string "Внутренняя ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Profile
+// @Route        /profile/photo/change-avatar/{photoId} [patch]
 func (handler *ProfileHandler) UpdateAvatar() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
@@ -257,16 +245,15 @@ func (handler *ProfileHandler) UpdateAvatar() http.HandlerFunc {
 }
 
 // getAvatar godoc
-// @Summary Получить аватар пользователя
-// @Description Возвращает ID текущего аватара авторизованного пользователя
-// @Tags Profile
-// @Produce json
-// @Success 200 {string} string "ID аватара пользователя"
-// @Failure 404 {string} string "Not Found - аватар не установлен"
-// @Failure 401 {string} string "Unauthorized - пользователь не авторизован"
-// @Failure 500 {string} string "Internal Server Error - ошибка сервера"
-// @Security ApiKeyAuth
-// @Router /profile/avatar [get]
+// @Title        Получить аватар пользователя
+// @Description  Возвращает ID текущего аватара авторизованного пользователя
+// @Success      200 {string} string "ID аватара пользователя"
+// @Failure      404 {string} string "Not Found - аватар не установлен"
+// @Failure      401 {string} string "Unauthorized - пользователь не авторизован"
+// @Failure      500 {string} string "Internal Server Error - ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Profile
+// @Route        /profile/avatar [get]
 func (handler *ProfileHandler) getAvatar() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
