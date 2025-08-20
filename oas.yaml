@@ -17,11 +17,11 @@
   "servers": [
     {
       "url": "http://localhost:8081",
-      "description": " \"Локальный сервер для разработки\""
+      "description": " Локальный сервер для разработки"
     },
     {
-      "url": "https://185.61.254.35:8081",
-      "description": " \"Тестовый стенд (Staging)\""
+      "url": "http://185.61.254.35:8081",
+      "description": " Документация"
     }
   ],
   "paths": {

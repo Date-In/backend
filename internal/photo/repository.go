@@ -81,6 +81,22 @@ func (repo *PhotoRepository) FindAvatar(userId uint) (string, error) {
 	return avatarID, nil
 }
 
+func (repo *PhotoRepository) FindUserPhotoWithoutAvatar(userId uint) ([]string, error) {
+	var photoIds []string
+
+	err := repo.db.PgDb.Model(&model.Photo{}).
+		Select("id").
+		Where("user_id = ? and is_avatar = ?", userId, false).
+		Find(&photoIds).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return photoIds, nil
+		}
+		return nil, err
+	}
+	return photoIds, nil
+}
+
 func (repo *PhotoRepository) ChangeAvatarUser(userId uint, photoId string) (string, error) {
 	tx := repo.db.PgDb.Begin()
 	var newAvatarID string
