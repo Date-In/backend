@@ -461,6 +461,123 @@
         "description": " Возвращает список всех мэтчей, в которых участвует текущий авторизованный пользователь."
       }
     },
+    "/photo/{id}/all": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Массив ссылок на фотографии",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный ID пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Photo"
+        ],
+        "summary": "Получить все ссылки на фото пользователя",
+        "description": " Возвращает JSON-массив со строками-ссылками на все фотографии пользователя.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID Пользователя",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "description": "ID Пользователя"
+            }
+          }
+        ]
+      }
+    },
+    "/photo/{uuid}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Бинарные данные файла фотографии\" // \u003c--- ИЗМЕНЕНИЕ ЗДЕСЬ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос (UUID не указан)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Фотография не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Photo"
+        ],
+        "summary": "Получить файл фотографии",
+        "description": " Возвращает бинарные данные фотографии по её UUID",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "UUID фотографии",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID фотографии"
+            }
+          }
+        ]
+      }
+    },
     "/profile": {
       "get": {
         "responses": {
