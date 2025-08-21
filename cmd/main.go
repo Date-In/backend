@@ -68,13 +68,14 @@ func main() {
 	//service
 	photoS3Service := filestorage.NewS3FileStorage(photoS3Client, config)
 	photoService := photo.NewPhotoService(photoRepository, photoS3Service)
-	authService := auth.NewAuthService(userRepository, refCache, tokenGenerator)
-	profileService := profile.NewProfileService(userRepository, photoService, refCache)
+	userService := user.NewUserService(userRepository)
+	authService := auth.NewAuthService(userService, refCache, tokenGenerator)
+	profileService := profile.NewProfileService(userService, photoService, refCache)
 	filterService := filter.NewFilterService(filterRepository)
-	recommendationService := recommendations.NewRecommendationService(userRepository, filterRepository)
-	actionService := action.NewActionsService(userRepository, actionsRepository)
-	likeService := like.NewLikeService(likeRepository, userRepository, matchRepository)
+	recommendationService := recommendations.NewRecommendationService(userService, filterService)
+	actionService := action.NewActionsService(userService, actionsRepository)
 	matchService := match.NewMatchService(matchRepository)
+	likeService := like.NewLikeService(likeRepository, userService, matchService)
 	//background tasks
 	go func() {
 		ticker := time.NewTicker(24 * time.Hour)

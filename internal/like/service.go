@@ -7,17 +7,17 @@ import (
 )
 
 type LikeService struct {
-	repo            *LikeRepository
-	userRepository  *user.UserRepository
-	matchRepository *match.MatchRepository
+	repo         *LikeRepository
+	userService  *user.UserService
+	matchService *match.MatchService
 }
 
-func NewLikeService(repo *LikeRepository, userRepository *user.UserRepository, matchRepository *match.MatchRepository) *LikeService {
-	return &LikeService{repo, userRepository, matchRepository}
+func NewLikeService(repo *LikeRepository, userService *user.UserService, matchService *match.MatchService) *LikeService {
+	return &LikeService{repo, userService, matchService}
 }
 
 func (service *LikeService) CreateLike(userId, targetId uint) error {
-	entity, err := service.userRepository.FindUserWithoutEntity(targetId)
+	entity, err := service.userService.FindUserWithoutEntity(targetId)
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func (service *LikeService) CreateLike(userId, targetId uint) error {
 		return err
 	}
 	if found != nil {
-		err = service.matchRepository.Create(userId, targetId)
+		err = service.matchService.Create(userId, targetId)
 		if err != nil {
 			return err
 		}

@@ -12,17 +12,17 @@ import (
 const TokenDuration = time.Hour * 72
 
 type AuthService struct {
-	repo         *user.UserRepository
+	usersService *user.UserService
 	cache        cache.IReferenceCache
 	tokenManager *JWT.JWT
 }
 
-func NewAuthService(repo *user.UserRepository, cache cache.IReferenceCache, tm *JWT.JWT) *AuthService {
-	return &AuthService{repo: repo, cache: cache, tokenManager: tm}
+func NewAuthService(service *user.UserService, cache cache.IReferenceCache, tm *JWT.JWT) *AuthService {
+	return &AuthService{usersService: service, cache: cache, tokenManager: tm}
 }
 
 func (service *AuthService) Register(phone string, name string, password string, sexID uint, age uint) (*string, error) {
-	exist, err := service.repo.FindByPhone(phone)
+	exist, err := service.usersService.FindUserByPhone(phone)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (service *AuthService) Register(phone string, name string, password string,
 		StatusID: 1,
 	}
 
-	err = service.repo.Create(createdUser)
+	err = service.usersService.Create(createdUser)
 	if err != nil {
 		return nil, err
 	}
@@ -60,20 +60,20 @@ func (service *AuthService) Register(phone string, name string, password string,
 }
 
 func (service *AuthService) Login(phone, password string) (*string, error) {
-	user, err := service.repo.FindByPhone(phone)
+	exist, err := service.usersService.FindUserByPhone(phone)
 	if err != nil {
 		return nil, err
 	}
-	if user == nil {
+	if exist == nil {
 		return nil, ErrIncorrectPasswordOrPhone
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(exist.Password), []byte(password))
 	if err != nil {
 		return nil, ErrIncorrectPasswordOrPhone
 	}
 
-	token, err := service.tokenManager.GenerateToken(user.ID, TokenDuration)
+	token, err := service.tokenManager.GenerateToken(exist.ID, TokenDuration)
 	if err != nil {
 		return nil, err
 	}

@@ -6,12 +6,12 @@ import (
 )
 
 type ActionsService struct {
-	userRepo   *user.UserRepository
-	actionRepo *ActionsRepository
+	userService *user.UserService
+	actionRepo  *ActionsRepository
 }
 
-func NewActionsService(userRepo *user.UserRepository, actionRepo *ActionsRepository) *ActionsService {
-	return &ActionsService{userRepo, actionRepo}
+func NewActionsService(userService *user.UserService, actionRepo *ActionsRepository) *ActionsService {
+	return &ActionsService{userService, actionRepo}
 }
 
 func (service *ActionsService) Get(userId uint) (*Actions, error) {
@@ -26,7 +26,7 @@ func (service *ActionsService) Update(userId uint) error {
 	if err := service.actionRepo.Update(userId, time.Now()); err != nil {
 		return err
 	}
-	if err := service.userRepo.ReactivateUser(userId); err != nil {
+	if err := service.userService.ReactivateUser(userId); err != nil {
 		return err
 	}
 	return nil
@@ -38,7 +38,7 @@ func (service *ActionsService) ChangeStatusToNonActive() {
 	if err != nil {
 		return
 	}
-	err = service.userRepo.ChangeStatusUsers(idsToDeactivate)
+	err = service.userService.ChangeStatus(idsToDeactivate)
 	if err != nil {
 		return
 	}

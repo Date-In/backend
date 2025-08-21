@@ -16,7 +16,6 @@ func NewUserRepository(db *db.Db) *UserRepository {
 }
 
 func (repo *UserRepository) Create(user *model.User) error {
-
 	return repo.db.PgDb.Create(user).Error
 }
 
@@ -63,9 +62,7 @@ func (repo *UserRepository) Update(id uint, updateData *model.User) error {
 func (r *UserRepository) ReplaceInterests(userID uint, interests []*model.Interest) error {
 	var user model.User
 	user.ID = userID
-
 	err := r.db.PgDb.Model(&user).Association("Interests").Replace(interests)
-
 	return err
 }
 
@@ -73,12 +70,6 @@ func (repo *UserRepository) FindUsersWithFilter(minAge, maxAge, sexID uint, loca
 	var users []*model.User
 	query := repo.db.PgDb.Model(&model.User{})
 	var totalCount int64
-	if page <= 0 {
-		page = 1
-	}
-	if pageSize <= 0 {
-		pageSize = 20
-	}
 	offset := (page - 1) * pageSize
 	query = query.Where("age BETWEEN ? AND ?", minAge, maxAge).
 		Where("sex_id = ?", sexID)
@@ -102,7 +93,6 @@ func (repo *UserRepository) FindUsersWithFilter(minAge, maxAge, sexID uint, loca
 		Users:      users,
 		TotalCount: totalCount,
 	}
-
 	return paginatedResult, nil
 }
 
@@ -119,12 +109,8 @@ func (repo *UserRepository) FindUserWithoutEntity(userId uint) (*model.User, err
 }
 
 func (repo *UserRepository) ChangeStatusUsers(ids []uint) error {
-	if len(ids) == 0 {
-		return nil
-	}
 	return repo.db.PgDb.Model(&model.User{}).Where("id IN (?) AND status_id != 3", ids).Update("status_id", 2).Error
 }
-
 func (repo *UserRepository) ReactivateUser(userID uint) error {
 	result := repo.db.PgDb.Model(&model.User{}).
 		Where("id = ? AND status_id = ? AND status_id != 3", userID, 2).

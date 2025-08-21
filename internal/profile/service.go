@@ -7,30 +7,29 @@ import (
 	"dating_service/internal/photo"
 	"dating_service/internal/user"
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 )
 
 type ProfileService struct {
-	repo         *user.UserRepository
+	userService  *user.UserService
 	photoService *photo.PhotoService
 	cache        cache.IReferenceCache
 }
 
-func NewProfileService(repo *user.UserRepository, photoService *photo.PhotoService, cache cache.IReferenceCache) *ProfileService {
-	return &ProfileService{repo, photoService, cache}
+func NewProfileService(userService *user.UserService, photoService *photo.PhotoService, cache cache.IReferenceCache) *ProfileService {
+	return &ProfileService{userService, photoService, cache}
 }
 
 func (service *ProfileService) GetInfo(id uint) (*model.User, error) {
-	user, err := service.repo.FindById(id)
+	currentUser, err := service.userService.FindById(id)
 	if err != nil {
 		return nil, err
 	}
-	if user == nil {
+	if currentUser == nil {
 		return nil, ErrUserNotFound
 	}
-	PreloadCache(user, service.cache)
-	return user, nil
+	PreloadCache(currentUser, service.cache)
+	return currentUser, nil
 }
 
 func (service *ProfileService) Update(
@@ -49,8 +48,7 @@ func (service *ProfileService) Update(
 	attitudeToAlcoholID *uint,
 	attitudeToSmokingID *uint,
 ) (*model.User, error) {
-	updateUser, err := service.repo.FindById(id)
-	PreloadCache(updateUser, service.cache)
+	updateUser, err := service.userService.FindById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -119,13 +117,13 @@ func (service *ProfileService) Update(
 		updateUser.AttitudeToSmokingID = attitudeToSmokingID
 	}
 
-	err = service.repo.Update(id, updateUser)
+	err = service.userService.Update(id, updateUser)
 	if err != nil {
 		return nil, err
 	}
-	userUpd, err := service.repo.FindById(id)
+	userUpd, err := service.userService.FindById(id)
 	PreloadCache(userUpd, service.cache)
-	return updateUser, err
+	return userUpd, err
 }
 
 func (service *ProfileService) UpdateInterests(userID uint, interestIDs []uint) ([]*model.Interest, error) {
@@ -136,18 +134,11 @@ func (service *ProfileService) UpdateInterests(userID uint, interestIDs []uint) 
 	for i, id := range interestIDs {
 		interestsToSet[i] = &model.Interest{ID: id}
 	}
-
-	err := service.repo.ReplaceInterests(userID, interestsToSet)
+	interest, err := service.userService.UpdateInterests(userID, interestsToSet)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка в репозитории при замене интересов для userID %d: %w", userID, err)
+		return nil, err
 	}
-
-	updatedUser, err := service.repo.FindById(userID)
-	if err != nil {
-		return nil, fmt.Errorf("не удалось получить профиль после обновления интересов: %w", err)
-	}
-
-	return updatedUser.Interests, nil
+	return interest, nil
 }
 
 func (service *ProfileService) AddPhoto(ctx context.Context, userID uint, data []byte, fileName string) (*model.Photo, error) {

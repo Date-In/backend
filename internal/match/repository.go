@@ -17,18 +17,9 @@ func NewMatchRepository(db *db.Db) *MatchRepository {
 }
 
 func (repo *MatchRepository) Create(userID1, userID2 uint) error {
-	var maxId uint
-	var minId uint
-	if userID1 > userID2 {
-		maxId = userID1
-		minId = userID2
-	} else {
-		maxId = userID2
-		minId = userID1
-	}
 	err := repo.db.PgDb.Create(&model.Match{
-		User1ID:   maxId,
-		User2ID:   minId,
+		User1ID:   userID1,
+		User2ID:   userID2,
 		CreatedAt: time.Now(),
 	}).Error
 	if err != nil {
