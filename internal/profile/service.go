@@ -2,33 +2,30 @@ package profile
 
 import (
 	"context"
-	"dating_service/internal/cache"
 	"dating_service/internal/model"
-	"dating_service/internal/photo"
-	"dating_service/internal/user"
 	"errors"
 	"gorm.io/gorm"
 )
 
 type ProfileService struct {
-	userService  *user.UserService
-	photoService *photo.PhotoService
-	cache        cache.IReferenceCache
+	userProvider  UserProvider
+	photoProvider PhotoProvider
+	cache         CacheProvider
 }
 
-func NewProfileService(userService *user.UserService, photoService *photo.PhotoService, cache cache.IReferenceCache) *ProfileService {
-	return &ProfileService{userService, photoService, cache}
+func NewProfileService(userProvider UserProvider, photoProvider PhotoProvider, cache CacheProvider) *ProfileService {
+	return &ProfileService{userProvider, photoProvider, cache}
 }
 
 func (service *ProfileService) GetInfo(id uint) (*model.User, error) {
-	currentUser, err := service.userService.FindById(id)
+	currentUser, err := service.userProvider.FindById(id)
 	if err != nil {
 		return nil, err
 	}
 	if currentUser == nil {
 		return nil, ErrUserNotFound
 	}
-	PreloadCache(currentUser, service.cache)
+	preloadCache(currentUser, service.cache)
 	return currentUser, nil
 }
 
@@ -48,14 +45,14 @@ func (service *ProfileService) Update(
 	attitudeToAlcoholID *uint,
 	attitudeToSmokingID *uint,
 ) (*model.User, error) {
-	updateUser, err := service.userService.FindById(id)
+	updateUser, err := service.userProvider.FindById(id)
 	if err != nil {
 		return nil, err
 	}
 	if updateUser == nil {
 		return nil, ErrUserNotFound
 	}
-	PreloadCache(updateUser, service.cache)
+	preloadCache(updateUser, service.cache)
 	if name != nil {
 		updateUser.Name = *name
 	}
@@ -117,12 +114,12 @@ func (service *ProfileService) Update(
 		updateUser.AttitudeToSmokingID = attitudeToSmokingID
 	}
 
-	err = service.userService.Update(id, updateUser)
+	err = service.userProvider.Update(id, updateUser)
 	if err != nil {
 		return nil, err
 	}
-	userUpd, err := service.userService.FindById(id)
-	PreloadCache(userUpd, service.cache)
+	userUpd, err := service.userProvider.FindById(id)
+	preloadCache(userUpd, service.cache)
 	return userUpd, err
 }
 
@@ -134,7 +131,7 @@ func (service *ProfileService) UpdateInterests(userID uint, interestIDs []uint) 
 	for i, id := range interestIDs {
 		interestsToSet[i] = &model.Interest{ID: id}
 	}
-	interest, err := service.userService.UpdateInterests(userID, interestsToSet)
+	interest, err := service.userProvider.UpdateInterests(userID, interestsToSet)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +139,7 @@ func (service *ProfileService) UpdateInterests(userID uint, interestIDs []uint) 
 }
 
 func (service *ProfileService) AddPhoto(ctx context.Context, userID uint, data []byte, fileName string) (*model.Photo, error) {
-	count, err := service.photoService.CountPhoto(userID)
+	count, err := service.photoProvider.CountPhoto(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrUserNotFound
@@ -152,7 +149,7 @@ func (service *ProfileService) AddPhoto(ctx context.Context, userID uint, data [
 	if count >= 5 {
 		return nil, ErrLimitPhoto
 	}
-	addPhoto, err := service.photoService.AddPhoto(ctx, userID, data, fileName)
+	addPhoto, err := service.photoProvider.AddPhoto(ctx, userID, data, fileName)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +157,7 @@ func (service *ProfileService) AddPhoto(ctx context.Context, userID uint, data [
 }
 
 func (service *ProfileService) DeletePhoto(ctx context.Context, photoId string, userId uint) error {
-	rowsAffected, err := service.photoService.DeletePhoto(ctx, photoId, userId)
+	rowsAffected, err := service.photoProvider.DeletePhoto(ctx, photoId, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ErrPhotoNotFound
@@ -174,7 +171,7 @@ func (service *ProfileService) DeletePhoto(ctx context.Context, photoId string, 
 }
 
 func (service *ProfileService) UpdateAvatar(photoId string, userID uint) (string, error) {
-	newAvatarId, err := service.photoService.ChangeAvatarUser(photoId, userID)
+	newAvatarId, err := service.photoProvider.ChangeAvatarUser(photoId, userID)
 	if err != nil {
 		return "", err
 	}
@@ -182,14 +179,14 @@ func (service *ProfileService) UpdateAvatar(photoId string, userID uint) (string
 }
 
 func (service *ProfileService) GetAvatar(userID uint) (string, error) {
-	avatarUrl, err := service.photoService.FindAvatar(userID)
+	avatarUrl, err := service.photoProvider.FindAvatar(userID)
 	if err != nil {
 		return "", err
 	}
 	return avatarUrl, nil
 }
 
-func PreloadCache(user *model.User, c cache.IReferenceCache) {
+func preloadCache(user *model.User, c CacheProvider) {
 	if user.SexID == 0 {
 		user.Sex = c.GetSexByID(user.SexID)
 	}
@@ -198,23 +195,18 @@ func PreloadCache(user *model.User, c cache.IReferenceCache) {
 	}
 	if user.WorldviewID != nil {
 		user.Worldview = c.GetWorldviewByID(*user.WorldviewID)
-
 	}
 	if user.TypeOfDatingID != nil {
 		user.TypeOfDating = c.GetTypeOfDatingByID(*user.TypeOfDatingID)
-
 	}
 	if user.EducationID != nil {
 		user.Education = c.GetEducationByID(*user.EducationID)
-
 	}
 	if user.AttitudeToAlcoholID != nil {
 		user.AttitudeToAlcohol = c.GetAttitudeToAlcoholByID(*user.AttitudeToAlcoholID)
-
 	}
 	if user.AttitudeToSmokingID != nil {
 		user.AttitudeToSmoking = c.GetAttitudeToSmokingByID(*user.AttitudeToSmokingID)
-
 	}
 	if user.StatusID != 0 {
 		user.Status = c.GetStatusByID(user.StatusID)

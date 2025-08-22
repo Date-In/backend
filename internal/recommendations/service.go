@@ -1,20 +1,17 @@
 package recommendations
 
 import (
-	"dating_service/internal/filter"
 	"dating_service/internal/model"
-	"dating_service/internal/user"
-	"fmt"
 	"sort"
 )
 
 type RecommendationService struct {
-	userService   *user.UserService
-	filterService *filter.FilterService
+	userProvider   UserProvider
+	filterProvider FilterProvider
 }
 
-func NewRecommendationService(userService *user.UserService, filterService *filter.FilterService) *RecommendationService {
-	return &RecommendationService{userService, filterService}
+func NewRecommendationService(userProvider UserProvider, filterProvider FilterProvider) *RecommendationService {
+	return &RecommendationService{userProvider, filterProvider}
 }
 
 type ScoredUser struct {
@@ -113,26 +110,25 @@ func CalculateMatchScore(currentUser, candidateUser *model.User, weights Scoring
 }
 
 func (service *RecommendationService) GetRecommendations(currentUserID uint, page, pageSize int) ([]ScoredUser, error) {
-	currentUser, err := service.userService.FindUserWithoutEntity(currentUserID)
+	currentUser, err := service.userProvider.FindUserWithoutEntity(currentUserID)
 	if err != nil {
 		return nil, err
 	}
 	if currentUser == nil {
 		return nil, ErrUserNotFound
 	}
-	userFilter, err := service.filterService.GetFilter(currentUserID)
+	userFilter, err := service.filterProvider.GetFilter(currentUserID)
 	if err != nil {
 		return nil, err
 	}
 	if userFilter == nil {
 		return nil, ErrFilterNotFound
 	}
-	resp, err := service.userService.FindUsersWithFilter(userFilter, page, pageSize)
+	users, _, err := service.userProvider.FindUsersWithFilter(userFilter, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(resp.TotalCount)
-	filteredUsers := resp.Users
+	filteredUsers := users
 	scoredUsers := make([]ScoredUser, 0, len(filteredUsers))
 
 	baseScoreWeight := DefaultWeights()

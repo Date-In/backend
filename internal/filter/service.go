@@ -5,15 +5,15 @@ import (
 )
 
 type FilterService struct {
-	repo *FilterRepository
+	filterStorage FilterStorage
 }
 
-func NewFilterService(repo *FilterRepository) *FilterService {
-	return &FilterService{repo: repo}
+func NewFilterService(filterStorage FilterStorage) *FilterService {
+	return &FilterService{filterStorage: filterStorage}
 }
 
 func (service *FilterService) CreateFilter(userId, minAge, maxAge, sexId uint, location string) error {
-	filter, err := service.repo.GetFilterUser(userId)
+	filter, err := service.filterStorage.GetFilterUser(userId)
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func (service *FilterService) CreateFilter(userId, minAge, maxAge, sexId uint, l
 	if minAge > maxAge {
 		return ErrMaxAndMinValue
 	}
-	err = service.repo.CreateFilter(model.FilterSearch{
+	err = service.filterStorage.CreateFilter(model.FilterSearch{
 		UserID:   userId,
 		MinAge:   minAge,
 		MaxAge:   maxAge,
@@ -37,7 +37,7 @@ func (service *FilterService) CreateFilter(userId, minAge, maxAge, sexId uint, l
 }
 
 func (service *FilterService) GetFilter(userID uint) (*model.FilterSearch, error) {
-	filter, err := service.repo.GetFilterUser(userID)
+	filter, err := service.filterStorage.GetFilterUser(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (service *FilterService) GetFilter(userID uint) (*model.FilterSearch, error
 }
 
 func (service *FilterService) UpdateUserFilter(userID uint, minAge, maxAge, sexId *uint, location *string) error {
-	existingFilter, err := service.repo.GetFilterUser(userID)
+	existingFilter, err := service.filterStorage.GetFilterUser(userID)
 	if err != nil {
 		return err
 	}
@@ -71,6 +71,6 @@ func (service *FilterService) UpdateUserFilter(userID uint, minAge, maxAge, sexI
 	if existingFilter.MinAge > existingFilter.MaxAge {
 		return ErrMaxAndMinValue
 	}
-	err = service.repo.UpdateFilter(*existingFilter)
+	err = service.filterStorage.UpdateFilter(*existingFilter)
 	return err
 }

@@ -1,30 +1,28 @@
 package like
 
 import (
-	"dating_service/internal/match"
 	"dating_service/internal/model"
-	"dating_service/internal/user"
 )
 
 type LikeService struct {
-	repo         *LikeRepository
-	userService  *user.UserService
-	matchService *match.MatchService
+	likeStorage   LikeStorage
+	userProvider  UserProvider
+	matchProvider MatchProvider
 }
 
-func NewLikeService(repo *LikeRepository, userService *user.UserService, matchService *match.MatchService) *LikeService {
-	return &LikeService{repo, userService, matchService}
+func NewLikeService(likeStorage LikeStorage, userProvider UserProvider, matchProvider MatchProvider) *LikeService {
+	return &LikeService{likeStorage, userProvider, matchProvider}
 }
 
 func (service *LikeService) CreateLike(userId, targetId uint) error {
-	entity, err := service.userService.FindUserWithoutEntity(targetId)
+	entity, err := service.userProvider.FindUserWithoutEntity(targetId)
 	if err != nil {
 		return err
 	}
 	if entity == nil {
 		return ErrNotFoundUser
 	}
-	foundRepeatLike, err := service.repo.FindLikeByTargetIdAndUserID(targetId, userId)
+	foundRepeatLike, err := service.likeStorage.FindLikeByTargetIdAndUserID(targetId, userId)
 	if err != nil {
 		return err
 	}
@@ -32,16 +30,16 @@ func (service *LikeService) CreateLike(userId, targetId uint) error {
 		return nil
 	}
 
-	found, err := service.repo.FindLikeByTargetIdAndUserID(userId, targetId)
+	found, err := service.likeStorage.FindLikeByTargetIdAndUserID(userId, targetId)
 	if err != nil {
 		return err
 	}
-	err = service.repo.CreateLike(userId, targetId)
+	err = service.likeStorage.CreateLike(userId, targetId)
 	if err != nil {
 		return err
 	}
 	if found != nil {
-		err = service.matchService.Create(userId, targetId)
+		err = service.matchProvider.Create(userId, targetId)
 		if err != nil {
 			return err
 		}
@@ -50,7 +48,7 @@ func (service *LikeService) CreateLike(userId, targetId uint) error {
 }
 
 func (service *LikeService) GetLikes(userId uint) ([]model.Like, error) {
-	likesId, err := service.repo.GetLikes(userId)
+	likesId, err := service.likeStorage.GetLikes(userId)
 	if err != nil {
 		return nil, err
 	}

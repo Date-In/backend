@@ -13,24 +13,24 @@ import (
 )
 
 type ChatHandler struct {
-	upgrader websocket.Upgrader
-	hubs     map[uint]*Hub
-	mu       sync.RWMutex
-	repo     *ChatRepository
-	conf     *configs.Config
+	upgrader    websocket.Upgrader
+	hubs        map[uint]*Hub
+	mu          sync.RWMutex
+	chatStorage ChatStorage
+	conf        *configs.Config
 }
 
-func NewChatHandler(router *http.ServeMux, repo *ChatRepository, conf *configs.Config) {
+func NewChatHandler(router *http.ServeMux, chatStorage ChatStorage, conf *configs.Config) {
 	service := &ChatHandler{
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
 			},
 		},
-		hubs: make(map[uint]*Hub),
-		mu:   sync.RWMutex{},
-		repo: repo,
-		conf: conf,
+		hubs:        make(map[uint]*Hub),
+		mu:          sync.RWMutex{},
+		chatStorage: chatStorage,
+		conf:        conf,
 	}
 	router.HandleFunc("/chat/ws", service.ServeWs())
 	router.HandleFunc("GET /chat/history", service.GetHistory())
@@ -69,7 +69,7 @@ func (s *ChatHandler) ServeWs() http.HandlerFunc {
 		s.mu.Lock()
 		hub, ok := s.hubs[uint(matchID)]
 		if !ok {
-			hub = NewHub(uint(matchID), s.repo)
+			hub = NewHub(uint(matchID), s.chatStorage)
 			s.hubs[uint(matchID)] = hub
 			go hub.Run()
 		}
@@ -115,7 +115,7 @@ func (s *ChatHandler) GetHistory() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
-		messages, err := s.repo.GetMessageHistory(uint(matchID), limit)
+		messages, err := s.chatStorage.GetMessageHistory(uint(matchID), limit)
 		if err != nil {
 			log.Printf("Failed to get messages: %v", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

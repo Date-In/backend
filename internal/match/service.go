@@ -3,15 +3,15 @@ package match
 import "dating_service/internal/model"
 
 type MatchService struct {
-	repo *MatchRepository
+	matchStorage MatchStorage
 }
 
-func NewMatchService(repo *MatchRepository) *MatchService {
-	return &MatchService{repo}
+func NewMatchService(matchStorage MatchStorage) *MatchService {
+	return &MatchService{matchStorage}
 }
 
 func (service *MatchService) GetAll(userId uint) ([]model.Match, error) {
-	matches, err := service.repo.GetAll(userId)
+	matches, err := service.matchStorage.GetAll(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func (service *MatchService) Create(userID1, userID2 uint) error {
 		maxId = userID2
 		minId = userID1
 	}
-	err := service.repo.Create(maxId, minId)
+	err := service.matchStorage.Create(maxId, minId)
 	if err != nil {
 		return err
 	}

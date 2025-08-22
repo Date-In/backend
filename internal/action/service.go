@@ -1,21 +1,20 @@
 package action
 
 import (
-	"dating_service/internal/user"
 	"time"
 )
 
 type ActionsService struct {
-	userService *user.UserService
-	actionRepo  *ActionsRepository
+	userProvider  UserProvider
+	actionStorage ActionStorage
 }
 
-func NewActionsService(userService *user.UserService, actionRepo *ActionsRepository) *ActionsService {
-	return &ActionsService{userService, actionRepo}
+func NewActionsService(userProvider UserProvider, actionStorage ActionStorage) *ActionsService {
+	return &ActionsService{userProvider, actionStorage}
 }
 
 func (service *ActionsService) Get(userId uint) (*Actions, error) {
-	get, err := service.actionRepo.Get(userId)
+	get, err := service.actionStorage.Get(userId)
 	if err != nil {
 		return nil, ErrNotFound
 	}
@@ -23,10 +22,10 @@ func (service *ActionsService) Get(userId uint) (*Actions, error) {
 }
 
 func (service *ActionsService) Update(userId uint) error {
-	if err := service.actionRepo.Update(userId, time.Now()); err != nil {
+	if err := service.actionStorage.Update(userId, time.Now()); err != nil {
 		return err
 	}
-	if err := service.userService.ReactivateUser(userId); err != nil {
+	if err := service.userProvider.ReactivateUser(userId); err != nil {
 		return err
 	}
 	return nil
@@ -34,11 +33,11 @@ func (service *ActionsService) Update(userId uint) error {
 
 func (service *ActionsService) ChangeStatusToNonActive() {
 	inactiveThreshold := time.Now().AddDate(-1, 0, 0)
-	idsToDeactivate, err := service.actionRepo.GetNonActiveUserIds(inactiveThreshold)
+	idsToDeactivate, err := service.actionStorage.GetNonActiveUserIds(inactiveThreshold)
 	if err != nil {
 		return
 	}
-	err = service.userService.ChangeStatus(idsToDeactivate)
+	err = service.userProvider.ChangeStatus(idsToDeactivate)
 	if err != nil {
 		return
 	}

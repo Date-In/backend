@@ -3,29 +3,28 @@ package photo
 import (
 	"bytes"
 	"context"
-	"dating_service/internal/filestorage"
 	"dating_service/internal/model"
 )
 
 type PhotoService struct {
-	repository    *PhotoRepository
-	S3Filestorage *filestorage.S3FileStorage
+	photoStorage PhotoStorage
+	s3Provider   S3Provider
 }
 
-func NewPhotoService(repository *PhotoRepository, S3Filestorage *filestorage.S3FileStorage) *PhotoService {
+func NewPhotoService(photoStorage PhotoStorage, s3Provider S3Provider) *PhotoService {
 	return &PhotoService{
-		repository, S3Filestorage,
+		photoStorage, s3Provider,
 	}
 }
 
 func (service *PhotoService) AddPhoto(ctx context.Context, userID uint, data []byte, fileName string) (*model.Photo, error) {
 	fileReader := bytes.NewReader(data)
-	url, objectKey, err := service.S3Filestorage.UploadFile(ctx, fileReader, fileName)
+	url, objectKey, err := service.s3Provider.UploadFile(ctx, fileReader, fileName)
 	if err != nil {
 		return nil, err
 	}
 	photo := model.NewPhoto(objectKey, url, userID)
-	err = service.repository.Save(photo)
+	err = service.photoStorage.Save(photo)
 	if err != nil {
 		return nil, err
 	}
@@ -33,11 +32,11 @@ func (service *PhotoService) AddPhoto(ctx context.Context, userID uint, data []b
 }
 
 func (service *PhotoService) DeletePhoto(ctx context.Context, photoId string, userId uint) (int, error) {
-	err := service.S3Filestorage.Delete(ctx, photoId)
+	err := service.s3Provider.Delete(ctx, photoId)
 	if err != nil {
 		return 0, err
 	}
-	rawAffected, err := service.repository.DeleteById(photoId, userId)
+	rawAffected, err := service.photoStorage.DeleteById(photoId, userId)
 	if err != nil {
 		return 0, err
 	}
@@ -45,7 +44,7 @@ func (service *PhotoService) DeletePhoto(ctx context.Context, photoId string, us
 }
 
 func (service *PhotoService) CountPhoto(userID uint) (int, error) {
-	countPhoto, err := service.repository.CountPhoto(userID)
+	countPhoto, err := service.photoStorage.CountPhoto(userID)
 	if err != nil {
 		return 0, err
 	}
@@ -53,7 +52,7 @@ func (service *PhotoService) CountPhoto(userID uint) (int, error) {
 }
 
 func (service *PhotoService) ChangeAvatarUser(photoId string, userID uint) (string, error) {
-	newAvatarId, err := service.repository.ChangeAvatarUser(userID, photoId)
+	newAvatarId, err := service.photoStorage.ChangeAvatarUser(userID, photoId)
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +60,7 @@ func (service *PhotoService) ChangeAvatarUser(photoId string, userID uint) (stri
 }
 
 func (service *PhotoService) FindAvatar(userID uint) (string, error) {
-	avatar, err := service.repository.FindAvatar(userID)
+	avatar, err := service.photoStorage.FindAvatar(userID)
 	if err != nil {
 		return "", err
 	}

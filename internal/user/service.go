@@ -6,11 +6,11 @@ import (
 )
 
 type UserService struct {
-	repo *UserRepository
+	userStorage UserStorage
 }
 
-func NewUserService(repo *UserRepository) *UserService {
-	return &UserService{repo}
+func NewUserService(userStorage UserStorage) *UserService {
+	return &UserService{userStorage}
 }
 
 func (service *UserService) FindUserByPhone(phone string) (*model.User, error) {
@@ -18,7 +18,7 @@ func (service *UserService) FindUserByPhone(phone string) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	user, err := service.repo.FindByPhone(normPhone)
+	user, err := service.userStorage.FindByPhone(normPhone)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func (service *UserService) FindUserByPhone(phone string) (*model.User, error) {
 }
 
 func (service *UserService) Create(user *model.User) error {
-	err := service.repo.Create(user)
+	err := service.userStorage.Create(user)
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func (service *UserService) Create(user *model.User) error {
 }
 
 func (service *UserService) FindById(id uint) (*model.User, error) {
-	user, err := service.repo.FindById(id)
+	user, err := service.userStorage.FindById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (service *UserService) FindById(id uint) (*model.User, error) {
 }
 
 func (service *UserService) Update(id uint, user *model.User) error {
-	err := service.repo.Update(id, user)
+	err := service.userStorage.Update(id, user)
 	if err != nil {
 		return err
 	}
@@ -51,11 +51,11 @@ func (service *UserService) Update(id uint, user *model.User) error {
 }
 
 func (service *UserService) UpdateInterests(userID uint, interests []*model.Interest) ([]*model.Interest, error) {
-	err := service.repo.ReplaceInterests(userID, interests)
+	err := service.userStorage.ReplaceInterests(userID, interests)
 	if err != nil {
 		return nil, err
 	}
-	user, err := service.repo.FindById(userID)
+	user, err := service.userStorage.FindById(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -63,29 +63,29 @@ func (service *UserService) UpdateInterests(userID uint, interests []*model.Inte
 }
 
 func (service *UserService) FindUserWithoutEntity(userID uint) (*model.User, error) {
-	user, err := service.repo.FindUserWithoutEntity(userID)
+	user, err := service.userStorage.FindUserWithoutEntity(userID)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (service *UserService) FindUsersWithFilter(filter *model.FilterSearch, page, pageSize int) (*PaginatedUsersResult, error) {
+func (service *UserService) FindUsersWithFilter(filter *model.FilterSearch, page, pageSize int) ([]*model.User, int64, error) {
 	if page <= 0 {
 		page = 1
 	}
 	if pageSize <= 0 {
 		pageSize = 20
 	}
-	res, err := service.repo.FindUsersWithFilter(filter.MinAge, filter.MaxAge, filter.SexID, filter.Location, page, pageSize)
+	users, count, err := service.userStorage.FindUsersWithFilter(filter.MinAge, filter.MaxAge, filter.SexID, filter.Location, page, pageSize)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return res, nil
+	return users, count, nil
 }
 
 func (service *UserService) ReactivateUser(userID uint) error {
-	err := service.repo.ReactivateUser(userID)
+	err := service.userStorage.ReactivateUser(userID)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (service *UserService) ChangeStatus(ids []uint) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	err := service.repo.ChangeStatusUsers(ids)
+	err := service.userStorage.ChangeStatusUsers(ids)
 	if err != nil {
 		return err
 	}

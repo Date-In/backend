@@ -66,7 +66,7 @@ func (r *UserRepository) ReplaceInterests(userID uint, interests []*model.Intere
 	return err
 }
 
-func (repo *UserRepository) FindUsersWithFilter(minAge, maxAge, sexID uint, location string, page, pageSize int) (*PaginatedUsersResult, error) {
+func (repo *UserRepository) FindUsersWithFilter(minAge, maxAge, sexID uint, location string, page, pageSize int) ([]*model.User, int64, error) {
 	var users []*model.User
 	query := repo.db.PgDb.Model(&model.User{})
 	var totalCount int64
@@ -78,7 +78,7 @@ func (repo *UserRepository) FindUsersWithFilter(minAge, maxAge, sexID uint, loca
 	}
 	err := query.Count(&totalCount).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	query = query.
 		Offset(offset).
@@ -87,13 +87,9 @@ func (repo *UserRepository) FindUsersWithFilter(minAge, maxAge, sexID uint, loca
 		Preload("Interests")
 	result := query.Find(&users)
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, 0, result.Error
 	}
-	paginatedResult := &PaginatedUsersResult{
-		Users:      users,
-		TotalCount: totalCount,
-	}
-	return paginatedResult, nil
+	return users, totalCount, nil
 }
 
 func (repo *UserRepository) FindUserWithoutEntity(userId uint) (*model.User, error) {

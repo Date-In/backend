@@ -1,9 +1,7 @@
 package auth
 
 import (
-	"dating_service/internal/cache"
 	"dating_service/internal/model"
-	"dating_service/internal/user"
 	"dating_service/pkg/JWT"
 	"golang.org/x/crypto/bcrypt"
 	"time"
@@ -12,17 +10,17 @@ import (
 const TokenDuration = time.Hour * 72
 
 type AuthService struct {
-	usersService *user.UserService
-	cache        cache.IReferenceCache
+	userProvider UserProvider
+	cache        CacheProvider
 	tokenManager *JWT.JWT
 }
 
-func NewAuthService(service *user.UserService, cache cache.IReferenceCache, tm *JWT.JWT) *AuthService {
-	return &AuthService{usersService: service, cache: cache, tokenManager: tm}
+func NewAuthService(userProvider UserProvider, cache CacheProvider, tm *JWT.JWT) *AuthService {
+	return &AuthService{userProvider: userProvider, cache: cache, tokenManager: tm}
 }
 
 func (service *AuthService) Register(phone string, name string, password string, sexID uint, age uint) (*string, error) {
-	exist, err := service.usersService.FindUserByPhone(phone)
+	exist, err := service.userProvider.FindUserByPhone(phone)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +44,7 @@ func (service *AuthService) Register(phone string, name string, password string,
 		StatusID: 1,
 	}
 
-	err = service.usersService.Create(createdUser)
+	err = service.userProvider.Create(createdUser)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +58,7 @@ func (service *AuthService) Register(phone string, name string, password string,
 }
 
 func (service *AuthService) Login(phone, password string) (*string, error) {
-	exist, err := service.usersService.FindUserByPhone(phone)
+	exist, err := service.userProvider.FindUserByPhone(phone)
 	if err != nil {
 		return nil, err
 	}

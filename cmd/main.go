@@ -115,7 +115,7 @@ func main() {
 	//routing
 	mainRouter.Handle("/auth/", publicRouter)
 	mainRouter.Handle("/swagger/", publicRouter)
-	mainRouter.Handle("/chat/", publicRouter)
+	mainRouter.Handle("/chat/ws", publicRouter)
 	mainRouter.Handle("/", protectedStackMiddleware(protectedRouter))
 	//start-server
 	server := http.Server{

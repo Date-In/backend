@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-type referenceCache struct {
+type ReferenceCache struct {
 	mu sync.RWMutex
 
 	sexIDs               map[uint]model.Sex
@@ -21,8 +21,7 @@ type referenceCache struct {
 	interestIDs          map[uint]model.Interest
 }
 
-func NewReferenceCache(db *db.Db) (IReferenceCache, error) {
-
+func NewReferenceCache(db *db.Db) (*ReferenceCache, error) {
 	var sexes []model.Sex
 	if err := db.PgDb.Find(&sexes).Error; err != nil {
 		return nil, err
@@ -106,7 +105,7 @@ func NewReferenceCache(db *db.Db) (IReferenceCache, error) {
 
 	log.Println("The directory cache has been loaded successfully")
 
-	return &referenceCache{
+	return &ReferenceCache{
 		sexIDs:               sexMap,
 		educationIDs:         eduMap,
 		zodiacSignIDs:        zodiacMap,
@@ -119,63 +118,63 @@ func NewReferenceCache(db *db.Db) (IReferenceCache, error) {
 	}, nil
 }
 
-func (c *referenceCache) IsValidSexID(id uint) bool {
+func (c *ReferenceCache) IsValidSexID(id uint) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.sexIDs[id]
 	return exists
 }
 
-func (c *referenceCache) IsValidEducationID(id uint) bool {
+func (c *ReferenceCache) IsValidEducationID(id uint) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.educationIDs[id]
 	return exists
 }
 
-func (c *referenceCache) IsValidZodiacSignID(id uint) bool {
+func (c *ReferenceCache) IsValidZodiacSignID(id uint) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.zodiacSignIDs[id]
 	return exists
 }
 
-func (c *referenceCache) IsValidWorldviewID(id uint) bool {
+func (c *ReferenceCache) IsValidWorldviewID(id uint) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.worldviewIDs[id]
 	return exists
 }
 
-func (c *referenceCache) IsValidTypeOfDatingID(id uint) bool {
+func (c *ReferenceCache) IsValidTypeOfDatingID(id uint) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.typeOfDatingIDs[id]
 	return exists
 }
 
-func (c *referenceCache) IsValidAttitudeToAlcoholID(id uint) bool {
+func (c *ReferenceCache) IsValidAttitudeToAlcoholID(id uint) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.attitudeToAlcoholIDs[id]
 	return exists
 }
 
-func (c *referenceCache) IsValidAttitudeToSmokingID(id uint) bool {
+func (c *ReferenceCache) IsValidAttitudeToSmokingID(id uint) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.attitudeToSmokingIDs[id]
 	return exists
 }
 
-func (c *referenceCache) IsValidStatusID(id uint) bool {
+func (c *ReferenceCache) IsValidStatusID(id uint) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.statusIDs[id]
 	return exists
 }
 
-func (c *referenceCache) IsValidInterestIDs(ids []uint) bool {
+func (c *ReferenceCache) IsValidInterestIDs(ids []uint) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -188,62 +187,62 @@ func (c *referenceCache) IsValidInterestIDs(ids []uint) bool {
 	return true
 }
 
-func (c *referenceCache) IsValidInterest(id uint) bool {
+func (c *ReferenceCache) IsValidInterest(id uint) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.interestIDs[id]
 	return exists
 }
 
-func (c *referenceCache) GetSexByID(id uint) model.Sex {
+func (c *ReferenceCache) GetSexByID(id uint) model.Sex {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.sexIDs[id]
 }
 
-func (c *referenceCache) GetEducationByID(id uint) model.Education {
+func (c *ReferenceCache) GetEducationByID(id uint) model.Education {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.educationIDs[id]
 }
 
-func (c *referenceCache) GetZodiacSignByID(id uint) model.ZodiacSign {
+func (c *ReferenceCache) GetZodiacSignByID(id uint) model.ZodiacSign {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.zodiacSignIDs[id]
 }
 
-func (c *referenceCache) GetWorldviewByID(id uint) model.Worldview {
+func (c *ReferenceCache) GetWorldviewByID(id uint) model.Worldview {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.worldviewIDs[id]
 }
 
-func (c *referenceCache) GetTypeOfDatingByID(id uint) model.TypeOfDating {
+func (c *ReferenceCache) GetTypeOfDatingByID(id uint) model.TypeOfDating {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.typeOfDatingIDs[id]
 }
 
-func (c *referenceCache) GetAttitudeToAlcoholByID(id uint) model.AttitudeToAlcohol {
+func (c *ReferenceCache) GetAttitudeToAlcoholByID(id uint) model.AttitudeToAlcohol {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.attitudeToAlcoholIDs[id]
 }
 
-func (c *referenceCache) GetAttitudeToSmokingByID(id uint) model.AttitudeToSmoking {
+func (c *ReferenceCache) GetAttitudeToSmokingByID(id uint) model.AttitudeToSmoking {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.attitudeToSmokingIDs[id]
 }
 
-func (c *referenceCache) GetStatusByID(id uint) model.Status {
+func (c *ReferenceCache) GetStatusByID(id uint) model.Status {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.statusIDs[id]
 }
 
-func (c *referenceCache) GetInterestByID(id uint) model.Interest {
+func (c *ReferenceCache) GetInterestByID(id uint) model.Interest {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.interestIDs[id]
