@@ -187,7 +187,7 @@ func (service *ProfileService) GetAvatar(userID uint) (string, error) {
 }
 
 func preloadCache(user *model.User, c CacheProvider) {
-	if user.SexID == 0 {
+	if user.SexID != 0 {
 		user.Sex = c.GetSexByID(user.SexID)
 	}
 	if user.ZodiacSignID != nil {

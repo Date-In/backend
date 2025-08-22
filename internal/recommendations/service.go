@@ -2,6 +2,7 @@ package recommendations
 
 import (
 	"dating_service/internal/model"
+	"fmt"
 	"sort"
 )
 
@@ -15,8 +16,8 @@ func NewRecommendationService(userProvider UserProvider, filterProvider FilterPr
 }
 
 type ScoredUser struct {
-	UserID uint
-	Score  float64
+	Users model.User
+	Score float64
 }
 
 type ScoringWeights struct {
@@ -125,6 +126,7 @@ func (service *RecommendationService) GetRecommendations(currentUserID uint, pag
 		return nil, ErrFilterNotFound
 	}
 	users, _, err := service.userProvider.FindUsersWithFilter(userFilter, page, pageSize)
+	fmt.Println(users)
 	if err != nil {
 		return nil, err
 	}
@@ -138,8 +140,8 @@ func (service *RecommendationService) GetRecommendations(currentUserID uint, pag
 		}
 		score := CalculateMatchScore(currentUser, candidate, baseScoreWeight)
 		scoredUsers = append(scoredUsers, ScoredUser{
-			UserID: candidate.ID,
-			Score:  score,
+			Users: *candidate,
+			Score: score,
 		})
 	}
 	sort.Slice(scoredUsers, func(i, j int) bool {

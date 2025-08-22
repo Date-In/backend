@@ -22,7 +22,7 @@ func NewRecommendationHandler(router *http.ServeMux, service *RecommendationServ
 // @Description  Возвращает отсортированный по релевантности (match score) список пользователей. Параметры пагинации передаются через query-параметры в URL.
 // @Param        page query int false "Номер страницы. По умолчанию: 1"
 // @Param        pageSize query int false "Количество элементов на странице. По умолчанию: 20"
-// @Success      200 {object} ScoredUser "Успешный ответ со списком рекомендованных пользователей"
+// @Success      200 {object} GetRecommendationsRes "Успешный ответ со списком рекомендованных пользователей"
 // @Failure      400 {string} string "Некорректный формат параметров пагинации"
 // @Failure      404 {string} string "Текущий пользователь или его фильтр не найден"
 // @Failure      500 {string} string "Внутренняя ошибка сервера"
@@ -62,6 +62,7 @@ func (handler *RecommendationHandler) GetRecommendations() http.HandlerFunc {
 			}
 			return
 		}
-		res.Json(w, userRecommendation, http.StatusOK)
+		resp := ScoredUserToGetRecommendationResponse(userRecommendation)
+		res.Json(w, resp, http.StatusOK)
 	}
 }

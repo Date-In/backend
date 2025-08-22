@@ -1,12 +1,28 @@
 package profile
 
-import "dating_service/internal/model"
+import (
+	"dating_service/internal/model"
+	"dating_service/internal/photo"
+)
 
 func ToProfileResponseDto(user *model.User) *GetInfoResponseDto {
 	if user == nil {
 		return nil
 	}
-
+	photoUser := user.Photos
+	avatar := &photo.PhotoDto{}
+	var gallery []photo.PhotoDto
+	for _, p := range photoUser {
+		if p.IsAvatar {
+			avatar.Url = p.Url
+			avatar.ID = p.ID
+		} else {
+			gallery = append(gallery, photo.PhotoDto{
+				ID:  p.ID,
+				Url: p.Url,
+			})
+		}
+	}
 	dto := &GetInfoResponseDto{
 		ID:       user.ID,
 		Name:     user.Name,
@@ -16,8 +32,9 @@ func ToProfileResponseDto(user *model.User) *GetInfoResponseDto {
 		Bio:      user.Bio,
 		Children: user.Children,
 		Height:   user.Height,
+		Avatar:   avatar,
+		Gallery:  gallery,
 	}
-
 	dto.Sex = &ReferenceDto{ID: &user.Sex.ID, Name: &user.Sex.Name}
 	dto.ZodiacSign = &ReferenceDto{ID: &user.ZodiacSign.ID, Name: &user.ZodiacSign.Name}
 	dto.Worldview = &ReferenceDto{ID: &user.Worldview.ID, Name: &user.Worldview.Name}

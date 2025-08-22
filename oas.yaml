@@ -835,7 +835,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ScoredUser"
+                  "$ref": "#/components/schemas/GetRecommendationsRes"
                 }
               }
             }
@@ -1025,13 +1025,26 @@
             }
           },
           "avatar": {
-            "type": "string"
+            "type": "object",
+            "$ref": "#/components/schemas/PhotoDto"
           },
-          "photo": {
+          "gallery": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/PhotoDto"
             }
+          }
+        }
+      },
+      "GetRecommendationsRes": {
+        "type": "object",
+        "properties": {
+          "User": {
+            "type": "object",
+            "$ref": "#/components/schemas/GetInfoResponseDto"
+          },
+          "PercentageOfMatch": {
+            "type": "integer"
           }
         }
       },
@@ -1085,6 +1098,17 @@
           }
         }
       },
+      "PhotoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
       "ReferenceDto": {
         "type": "object",
         "properties": {
@@ -1113,17 +1137,6 @@
           },
           "sex_id": {
             "type": "integer"
-          }
-        }
-      },
-      "ScoredUser": {
-        "type": "object",
-        "properties": {
-          "UserID": {
-            "type": "integer"
-          },
-          "Score": {
-            "type": "number"
           }
         }
       },
@@ -1195,6 +1208,83 @@
             "type": "array",
             "items": {
               "type": "integer"
+            }
+          }
+        }
+      },
+      "profile.GetInfoResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "children": {
+            "type": "boolean"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "sex": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "zodiac_sign": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "worldview": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "type_of_dating": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "education": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "attitude_to_alcohol": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "attitude_to_smoking": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "action": {
+            "type": "object",
+            "$ref": "#/components/schemas/ReferenceDto"
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDto"
+            }
+          },
+          "avatar": {
+            "type": "object",
+            "$ref": "#/components/schemas/PhotoDto"
+          },
+          "gallery": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhotoDto"
             }
           }
         }
