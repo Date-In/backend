@@ -28,14 +28,26 @@ func (repo *MatchRepository) Create(userID1, userID2 uint) error {
 	return nil
 }
 
-func (repo *MatchRepository) GetAll(userId uint) ([]model.Match, error) {
+func (repo *MatchRepository) GetAllWithDetails(userId uint) ([]model.Match, error) {
 	var matches []model.Match
+
 	err := repo.db.PgDb.Model(&model.Match{}).
+		Preload("User1", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name")
+		}).
+		Preload("User1.Avatar", "is_avatar = ?", true).
+		Preload("User2", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name")
+		}).
+		Preload("User2.Avatar", "is_avatar = ?", true).
+		Preload("LastMessage", func(db *gorm.DB) *gorm.DB {
+			return db.Order("messages.created_at DESC")
+		}).
 		Where("user1_id = ? OR user2_id = ?", userId, userId).
 		Find(&matches).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return matches, nil
+			return make([]model.Match, 0), nil
 		}
 		return nil, err
 	}

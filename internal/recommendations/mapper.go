@@ -34,35 +34,11 @@ func UserToUserForRecommendations(user *model.User) *UserForRecommendations {
 		}
 	}
 	dto := &UserForRecommendations{
-		ID:       user.ID,
-		Name:     user.Name,
-		Age:      user.Age,
-		Bio:      user.Bio,
-		City:     user.City,
-		Children: user.Children,
-		Height:   user.Height,
-	}
-	dto.Sex = &ReferenceDto{ID: &user.Sex.ID, Name: &user.Sex.Name}
-	dto.ZodiacSign = &ReferenceDto{ID: &user.ZodiacSign.ID, Name: &user.ZodiacSign.Name}
-	dto.Worldview = &ReferenceDto{ID: &user.Worldview.ID, Name: &user.Worldview.Name}
-	dto.TypeOfDating = &ReferenceDto{ID: &user.TypeOfDating.ID, Name: &user.TypeOfDating.Name}
-	dto.Education = &ReferenceDto{ID: &user.Education.ID, Name: &user.Education.Name}
-	dto.AttitudeToAlcohol = &ReferenceDto{ID: &user.AttitudeToAlcohol.ID, Name: &user.AttitudeToAlcohol.Name}
-	dto.AttitudeToSmoking = &ReferenceDto{ID: &user.AttitudeToSmoking.ID, Name: &user.AttitudeToSmoking.Name}
-	dto.Status = &ReferenceDto{ID: &user.Status.ID, Name: &user.Status.Name}
-
-	if user.Interests != nil && len(user.Interests) > 0 {
-		dto.Interests = make([]*ReferenceDto, 0, len(user.Interests))
-		for _, interest := range user.Interests {
-			if interest != nil {
-				dto.Interests = append(dto.Interests, &ReferenceDto{
-					ID:   &interest.ID,
-					Name: &interest.Name,
-				})
-			}
-		}
-	} else {
-		dto.Interests = make([]*ReferenceDto, 0)
+		ID:   user.ID,
+		Name: user.Name,
+		Age:  user.Age,
+		Bio:  user.Bio,
+		City: user.City,
 	}
 	return dto
 }

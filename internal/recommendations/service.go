@@ -2,7 +2,6 @@ package recommendations
 
 import (
 	"dating_service/internal/model"
-	"fmt"
 	"sort"
 )
 
@@ -126,7 +125,6 @@ func (service *RecommendationService) GetRecommendations(currentUserID uint, pag
 		return nil, ErrFilterNotFound
 	}
 	users, _, err := service.userProvider.FindUsersWithFilter(userFilter, page, pageSize)
-	fmt.Println(users)
 	if err != nil {
 		return nil, err
 	}

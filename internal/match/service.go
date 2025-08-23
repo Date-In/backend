@@ -10,8 +10,8 @@ func NewMatchService(matchStorage MatchStorage) *MatchService {
 	return &MatchService{matchStorage}
 }
 
-func (service *MatchService) GetAll(userId uint) ([]model.Match, error) {
-	matches, err := service.matchStorage.GetAll(userId)
+func (s *MatchService) GetUserMatches(currentUserID uint) ([]model.Match, error) {
+	matches, err := s.matchStorage.GetAllWithDetails(currentUserID)
 	if err != nil {
 		return nil, err
 	}

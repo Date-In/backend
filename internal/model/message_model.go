@@ -13,6 +13,6 @@ type Message struct {
 	MatchID  uint `gorm:"not null"`
 	SenderID uint `gorm:"not null"`
 
-	Match  Match `gorm:"foreignKey:MatchID"`
-	Sender User  `gorm:"foreignKey:SenderID"`
+	Match  *Match `gorm:"foreignKey:MatchID"`
+	Sender User   `gorm:"foreignKey:SenderID"`
 }

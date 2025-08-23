@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 type ProfileHandler struct {
@@ -19,6 +20,7 @@ type ProfileHandler struct {
 func NewProfileHandler(router *http.ServeMux, service *ProfileService, ctx context.Context) {
 	handler := &ProfileHandler{service: service, ctx: ctx}
 	router.Handle("GET /profile", handler.GetInfo())
+	router.Handle("GET /profile/{userId}", handler.GetProfileUser())
 	router.Handle("PATCH /profile", handler.UpdateProfile())
 	router.Handle("PUT /profile/interests", handler.UpdateInterests())
 	router.Handle("POST /profile/photos", handler.AddPhoto())
@@ -49,7 +51,35 @@ func (handler *ProfileHandler) GetInfo() http.HandlerFunc {
 			}
 			return
 		}
-		res.Json(w, ToProfileResponseDto(user), http.StatusOK)
+		res.Json(w, ToUserInfoResponseDto(user), http.StatusOK)
+	}
+}
+
+// GetProfileUser godoc
+// @Title        Получение полной информации о пользователе
+// @Description  Возвращает публичные данные пользователя
+// @Param        userId path string true "ID пользователя"
+// @Success      200 {object} GetProfileResponseDto "Информация о профиле"
+// @Failure      404 {string} string "Пользователь не найден"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Profile
+// @Route        /profile/{userId} [get]
+func (handler *ProfileHandler) GetProfileUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userIdStr := r.PathValue("userId")
+		userId, err := strconv.ParseUint(userIdStr, 10, 64)
+		user, err := handler.service.GetInfo(uint(userId))
+		if err != nil {
+			switch {
+			case errors.Is(err, ErrUserNotFound):
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			default:
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+			return
+		}
+		res.Json(w, ToUserProfileResponseDto(user), http.StatusOK)
 	}
 }
 
@@ -106,7 +136,7 @@ func (handler *ProfileHandler) UpdateProfile() http.HandlerFunc {
 			}
 			return
 		}
-		res.Json(w, ToProfileResponseDto(updatedUser), http.StatusOK)
+		res.Json(w, ToUserInfoResponseDto(updatedUser), http.StatusOK)
 	}
 }
 

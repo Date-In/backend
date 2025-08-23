@@ -4,5 +4,5 @@ import "dating_service/internal/model"
 
 type MatchStorage interface {
 	Create(uint, uint) error
-	GetAll(uint) ([]model.Match, error)
+	GetAllWithDetails(uint) ([]model.Match, error)
 }

@@ -9,9 +9,25 @@ type Sex struct {
 	Name string `gorm:"unique;not null;size:50"`
 }
 
+func (i *Sex) GetID() uint {
+	return i.ID
+}
+
+func (i *Sex) GetName() string {
+	return i.Name
+}
+
 type Education struct {
 	ID   uint   `gorm:"primaryKey"`
 	Name string `gorm:"unique;not null;size:100"`
+}
+
+func (i *Education) GetID() uint {
+	return i.ID
+}
+
+func (i *Education) GetName() string {
+	return i.Name
 }
 
 type ZodiacSign struct {
@@ -19,9 +35,25 @@ type ZodiacSign struct {
 	Name string `gorm:"unique;not null;size:50"`
 }
 
+func (i *ZodiacSign) GetID() uint {
+	return i.ID
+}
+
+func (i *ZodiacSign) GetName() string {
+	return i.Name
+}
+
 type Worldview struct {
 	ID   uint   `gorm:"primaryKey"`
 	Name string `gorm:"unique;not null;size:100"`
+}
+
+func (i *Worldview) GetID() uint {
+	return i.ID
+}
+
+func (i *Worldview) GetName() string {
+	return i.Name
 }
 
 type TypeOfDating struct {
@@ -29,9 +61,25 @@ type TypeOfDating struct {
 	Name string `gorm:"unique;not null;size:100"`
 }
 
+func (i *TypeOfDating) GetID() uint {
+	return i.ID
+}
+
+func (i *TypeOfDating) GetName() string {
+	return i.Name
+}
+
 type AttitudeToAlcohol struct {
 	ID   uint   `gorm:"primaryKey"`
 	Name string `gorm:"unique;not null;size:100"`
+}
+
+func (i *AttitudeToAlcohol) GetID() uint {
+	return i.ID
+}
+
+func (i *AttitudeToAlcohol) GetName() string {
+	return i.Name
 }
 
 type AttitudeToSmoking struct {
@@ -39,9 +87,25 @@ type AttitudeToSmoking struct {
 	Name string `gorm:"unique;not null;size:100"`
 }
 
+func (i *AttitudeToSmoking) GetID() uint {
+	return i.ID
+}
+
+func (i *AttitudeToSmoking) GetName() string {
+	return i.Name
+}
+
 type Status struct {
 	ID   uint   `gorm:"primaryKey"`
 	Name string `gorm:"unique;not null;size:100"`
+}
+
+func (i *Status) GetID() uint {
+	return i.ID
+}
+
+func (i *Status) GetName() string {
+	return i.Name
 }
 
 type User struct {
@@ -74,4 +138,5 @@ type User struct {
 	LikesSent           []Like            `gorm:"foreignKey:UserID"`
 	LikesReceived       []Like            `gorm:"foreignKey:TargetID"`
 	Photos              []*Photo          `gorm:"foreignKey:UserID"`
+	Avatar              *Photo            `gorm:"foreignKey:UserID"`
 }

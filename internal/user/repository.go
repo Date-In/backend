@@ -35,7 +35,8 @@ func (repo *UserRepository) FindById(id uint) (*model.User, error) {
 	var user model.User
 	err := repo.db.PgDb.
 		Preload("Interests").
-		Preload("Photos").
+		Preload("Photos", "is_avatar = ?", false).
+		Preload("Avatar", "is_avatar = ?", true).
 		Where("id = ?", id).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

@@ -54,7 +54,7 @@ func (handler *LikeHandler) CreateLike() http.HandlerFunc {
 // GetLike godoc
 // @Title        Получить список своих лайков
 // @Description  Возвращает список всех лайков, поставленных текущим авторизованным пользователем.
-// @Success      200 {object} LikeDto "Список лайков"
+// @Success      200 {array} LikeDto "Список лайков"
 // @Failure      401 {string} string "Пользователь не авторизован"
 // @Failure      500 {string} string "Внутренняя ошибка сервера"
 // @Security     AuthorizationHeader
@@ -68,14 +68,7 @@ func (handler *LikeHandler) GetLike() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-		likesResponse := make([]LikeDto, 0, len(likes))
-		for _, like := range likes {
-			likesResponse = append(likesResponse, LikeDto{
-				ID:       like.ID,
-				UserID:   like.UserID,
-				TargetID: like.TargetID,
-			})
-		}
-		res.Json(w, GetLikeDto{Likes: likesResponse}, http.StatusOK)
+		likesResponse := LikeToDto(likes)
+		res.Json(w, likesResponse, http.StatusOK)
 	}
 }

@@ -19,9 +19,10 @@ func (repo *LikeRepository) GetLikes(userId uint) ([]model.Like, error) {
 	var likes []model.Like
 
 	err := repo.db.PgDb.Model(&model.Like{}).
+		Preload("User.Avatar", "is_avatar = ?", true).
+		Preload("User.Photos", "is_avatar = ?", false).
 		Where("target_id = ?", userId).
 		Find(&likes).Error
-
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return likes, nil
