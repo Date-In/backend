@@ -16,7 +16,7 @@ func NewRecommendationService(userProvider UserProvider, filterProvider FilterPr
 }
 
 type ScoredUser struct {
-	Users model.User
+	User  model.User
 	Score float64
 }
 
@@ -140,7 +140,7 @@ func (service *RecommendationService) GetRecommendations(currentUserID uint, pag
 		}
 		score := CalculateMatchScore(currentUser, candidate, baseScoreWeight)
 		scoredUsers = append(scoredUsers, ScoredUser{
-			Users: *candidate,
+			User:  *candidate,
 			Score: score,
 		})
 	}

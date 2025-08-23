@@ -2,7 +2,6 @@ package profile
 
 import (
 	"dating_service/internal/model"
-	"dating_service/internal/photo"
 )
 
 func ToProfileResponseDto(user *model.User) *GetInfoResponseDto {
@@ -10,14 +9,14 @@ func ToProfileResponseDto(user *model.User) *GetInfoResponseDto {
 		return nil
 	}
 	photoUser := user.Photos
-	avatar := &photo.PhotoDto{}
-	var gallery []photo.PhotoDto
+	avatar := &PhotoDto{}
+	var gallery []PhotoDto
 	for _, p := range photoUser {
 		if p.IsAvatar {
 			avatar.Url = p.Url
 			avatar.ID = p.ID
 		} else {
-			gallery = append(gallery, photo.PhotoDto{
+			gallery = append(gallery, PhotoDto{
 				ID:  p.ID,
 				Url: p.Url,
 			})
