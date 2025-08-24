@@ -42,3 +42,11 @@ func (service *MatchService) IsUserInMatch(userID uint, matchID uint) (bool, err
 	}
 	return exists, nil
 }
+
+func (service *MatchService) GetMatchUserIDs(userID uint) ([]uint, error) {
+	matchIds, err := service.matchStorage.GetMatchUserIDs(userID)
+	if err != nil {
+		return nil, err
+	}
+	return matchIds, nil
+}

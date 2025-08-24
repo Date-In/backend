@@ -69,3 +69,25 @@ func (r *MatchRepository) IsUserInMatch(userID uint, matchID uint) (bool, error)
 
 	return count > 0, nil
 }
+
+func (r *MatchRepository) GetMatchUserIDs(userID uint) ([]uint, error) {
+	var partnerIDs []uint
+	var partnerIDsFromUser1 []uint
+	err := r.db.PgDb.Model(&model.Match{}).
+		Where("user1_id = ?", userID).
+		Pluck("user2_id", &partnerIDsFromUser1).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	var partnerIDsFromUser2 []uint
+	err = r.db.PgDb.Model(&model.Match{}).
+		Where("user2_id = ?", userID).
+		Pluck("user1_id", &partnerIDsFromUser2).Error
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	partnerIDs = append(partnerIDs, partnerIDsFromUser1...)
+	partnerIDs = append(partnerIDs, partnerIDsFromUser2...)
+	return partnerIDs, nil
+}

@@ -10,6 +10,15 @@ func ToUserInfoResponseDto(user *model.User) *GetInfoResponseDto {
 	}
 
 	gallery := mapPhotos(user.Photos)
+	var avatar PhotoDto
+	if user.Avatar == nil {
+		avatar = PhotoDto{}
+	} else {
+		avatar = PhotoDto{
+			ID:  user.Avatar.ID,
+			Url: user.Avatar.Url,
+		}
+	}
 	interests := mapInterests(user.Interests)
 
 	return &GetInfoResponseDto{
@@ -22,10 +31,7 @@ func ToUserInfoResponseDto(user *model.User) *GetInfoResponseDto {
 		Children: user.Children,
 		Height:   user.Height,
 
-		Avatar: &PhotoDto{
-			ID:  user.Avatar.ID,
-			Url: user.Avatar.Url,
-		},
+		Avatar:    &avatar,
 		Gallery:   gallery,
 		Interests: interests,
 
@@ -46,6 +52,15 @@ func ToUserProfileResponseDto(user *model.User) *GetProfileResponseDto {
 	}
 
 	gallery := mapPhotos(user.Photos)
+	var avatar PhotoDto
+	if user.Avatar == nil {
+		avatar = PhotoDto{}
+	} else {
+		avatar = PhotoDto{
+			ID:  user.Avatar.ID,
+			Url: user.Avatar.Url,
+		}
+	}
 	interests := mapInterests(user.Interests)
 
 	return &GetProfileResponseDto{
@@ -57,10 +72,7 @@ func ToUserProfileResponseDto(user *model.User) *GetProfileResponseDto {
 		Children: user.Children,
 		Height:   user.Height,
 
-		Avatar: &PhotoDto{
-			ID:  user.Avatar.ID,
-			Url: user.Avatar.Url,
-		},
+		Avatar:    &avatar,
 		Gallery:   gallery,
 		Interests: interests,
 
@@ -76,18 +88,22 @@ func ToUserProfileResponseDto(user *model.User) *GetProfileResponseDto {
 }
 
 func mapPhotos(photos []*model.Photo) []PhotoDto {
-	gallery := make([]PhotoDto, 0)
+	if len(photos) == 0 {
+		return make([]PhotoDto, 0)
+	} else {
+		gallery := make([]PhotoDto, 0)
 
-	if photos == nil {
+		if photos == nil {
+			return gallery
+		}
+		for _, p := range photos {
+			gallery = append(gallery, PhotoDto{
+				ID:  p.ID,
+				Url: p.Url,
+			})
+		}
 		return gallery
 	}
-	for _, p := range photos {
-		gallery = append(gallery, PhotoDto{
-			ID:  p.ID,
-			Url: p.Url,
-		})
-	}
-	return gallery
 }
 
 type Referable interface {

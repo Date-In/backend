@@ -25,10 +25,19 @@ func mapPartnerToDTO(match model.Match, currentUserID uint) PartnerDTO {
 	} else {
 		partner = match.User1
 	}
+	var avatar PhotoDto
+	if partner.Avatar == nil {
+		avatar = PhotoDto{}
+	} else {
+		avatar = PhotoDto{
+			ID:  partner.Avatar.ID,
+			Url: partner.Avatar.Url,
+		}
+	}
 	return PartnerDTO{
-		ID:        partner.ID,
-		Name:      partner.Name,
-		AvatarURL: partner.Avatar.Url,
+		ID:     partner.ID,
+		Name:   partner.Name,
+		Avatar: avatar,
 	}
 }
 

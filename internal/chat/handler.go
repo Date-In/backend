@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type ChatHandler struct {
+type ChatHandlerWs struct {
 	upgrader      websocket.Upgrader
 	hubs          map[uint]*Hub
 	mu            sync.RWMutex
@@ -22,8 +22,21 @@ type ChatHandler struct {
 	conf          *configs.Config
 }
 
-func NewChatHandler(router *http.ServeMux, chatStorage ChatStorage, matchProvider MatchProvider, conf *configs.Config) {
-	service := &ChatHandler{
+type ChatHandler struct {
+	chatStorage   ChatStorage
+	matchProvider MatchProvider
+}
+
+func NewChatHandler(router *http.ServeMux, chatStorage ChatStorage, matchProvider MatchProvider) {
+	handler := &ChatHandler{
+		chatStorage:   chatStorage,
+		matchProvider: matchProvider,
+	}
+	router.Handle("GET /chat/history", handler.GetHistory())
+}
+
+func NewChatHandlerWs(router *http.ServeMux, chatStorage ChatStorage, matchProvider MatchProvider, conf *configs.Config) {
+	service := &ChatHandlerWs{
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
@@ -36,10 +49,9 @@ func NewChatHandler(router *http.ServeMux, chatStorage ChatStorage, matchProvide
 		conf:          conf,
 	}
 	router.HandleFunc("/chat/ws", service.ServeWs())
-	router.HandleFunc("GET /chat/history", service.GetHistory())
 }
 
-func (s *ChatHandler) ServeWs() http.HandlerFunc {
+func (s *ChatHandlerWs) ServeWs() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		matchIDStr := r.URL.Query().Get("match_id")
 		matchID, err := strconv.ParseUint(matchIDStr, 10, 64)

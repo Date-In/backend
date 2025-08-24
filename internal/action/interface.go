@@ -1,6 +1,8 @@
 package action
 
-import "time"
+import (
+	"time"
+)
 
 type UserProvider interface {
 	ReactivateUser(uint) error
@@ -8,7 +10,5 @@ type UserProvider interface {
 }
 
 type ActionStorage interface {
-	Get(uint) (*Actions, error)
-	Update(uint, time.Time) error
 	GetNonActiveUserIds(time.Time) ([]uint, error)
 }

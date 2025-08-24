@@ -4,6 +4,7 @@ import (
 	"context"
 	"dating_service/configs"
 	"dating_service/internal/action"
+	"dating_service/internal/activity"
 	"dating_service/internal/auth"
 	"dating_service/internal/cache"
 	"dating_service/internal/chat"
@@ -65,6 +66,7 @@ func main() {
 	likeRepository := like.NewLikeRepository(db)
 	matchRepository := match.NewMatchRepository(db)
 	chatRepository := chat.NewChatRepository(db)
+	activityRepository := activity.NewActivityRepository(db)
 	//service
 	photoS3Service := filestorage.NewS3FileStorage(photoS3Client, config)
 	photoService := photo.NewPhotoService(photoRepository, photoS3Service)
@@ -92,21 +94,21 @@ func main() {
 		httpSwagger.URL("/swagger/oas.yaml"),
 	))
 	auth.NewAuthHandler(publicRouter, authService)
+	chat.NewChatHandlerWs(publicRouter, chatRepository, matchService, config)
+	activity.NewActivityHandlerWs(publicRouter, activityRepository, matchService, config)
 	//handler-protected
 	profile.NewProfileHandler(protectedRouter, profileService, ctx)
 	filter.NewFilterHandler(protectedRouter, filterService)
 	recommendations.NewRecommendationHandler(protectedRouter, recommendationService)
 	like.NewLikeHandler(protectedRouter, likeService)
 	match.NewMatchHandler(protectedRouter, matchService)
-	chat.NewChatHandler(publicRouter, chatRepository, matchService, config)
+	chat.NewChatHandler(protectedRouter, chatRepository, matchService)
 	//middlewares
 	authMiddleware := middleware.NewAuthMiddleware(*config)
 	checkBlockedUserMiddleware := middleware.NewCheckBlockedUserMiddleware(userRepository)
-	statusUpdateMiddleware := middleware.NewStatusUpdateMiddleware(actionService)
 	protectedStackMiddleware := middleware.Chain(
 		authMiddleware,
 		checkBlockedUserMiddleware,
-		statusUpdateMiddleware,
 	)
 	globalStackMiddleware := middleware.Chain(
 		middleware.CORS,
@@ -116,6 +118,7 @@ func main() {
 	mainRouter.Handle("/auth/", publicRouter)
 	mainRouter.Handle("/swagger/", publicRouter)
 	mainRouter.Handle("/chat/ws", publicRouter)
+	mainRouter.Handle("/activity/ws", publicRouter)
 	mainRouter.Handle("/", protectedStackMiddleware(protectedRouter))
 	//start-server
 	server := http.Server{
