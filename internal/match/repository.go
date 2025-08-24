@@ -53,3 +53,19 @@ func (repo *MatchRepository) GetAllWithDetails(userId uint) ([]model.Match, erro
 	}
 	return matches, nil
 }
+
+func (r *MatchRepository) IsUserInMatch(userID uint, matchID uint) (bool, error) {
+	var count int64
+	result := r.db.PgDb.Model(&model.Match{}).
+		Where("id = ? AND (user1_id = ? OR user2_id = ?)", matchID, userID, userID).
+		Count(&count)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, result.Error
+	}
+
+	return count > 0, nil
+}

@@ -98,7 +98,7 @@ func main() {
 	recommendations.NewRecommendationHandler(protectedRouter, recommendationService)
 	like.NewLikeHandler(protectedRouter, likeService)
 	match.NewMatchHandler(protectedRouter, matchService)
-	chat.NewChatHandler(publicRouter, chatRepository, config)
+	chat.NewChatHandler(publicRouter, chatRepository, matchService, config)
 	//middlewares
 	authMiddleware := middleware.NewAuthMiddleware(*config)
 	checkBlockedUserMiddleware := middleware.NewCheckBlockedUserMiddleware(userRepository)

@@ -4,6 +4,7 @@ import (
 	"dating_service/configs"
 	"dating_service/pkg/JWT"
 	"dating_service/pkg/res"
+	"dating_service/pkg/utilits"
 	"log"
 	"net/http"
 	"strconv"
@@ -13,24 +14,26 @@ import (
 )
 
 type ChatHandler struct {
-	upgrader    websocket.Upgrader
-	hubs        map[uint]*Hub
-	mu          sync.RWMutex
-	chatStorage ChatStorage
-	conf        *configs.Config
+	upgrader      websocket.Upgrader
+	hubs          map[uint]*Hub
+	mu            sync.RWMutex
+	chatStorage   ChatStorage
+	matchProvider MatchProvider
+	conf          *configs.Config
 }
 
-func NewChatHandler(router *http.ServeMux, chatStorage ChatStorage, conf *configs.Config) {
+func NewChatHandler(router *http.ServeMux, chatStorage ChatStorage, matchProvider MatchProvider, conf *configs.Config) {
 	service := &ChatHandler{
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
 			},
 		},
-		hubs:        make(map[uint]*Hub),
-		mu:          sync.RWMutex{},
-		chatStorage: chatStorage,
-		conf:        conf,
+		hubs:          make(map[uint]*Hub),
+		mu:            sync.RWMutex{},
+		chatStorage:   chatStorage,
+		matchProvider: matchProvider,
+		conf:          conf,
 	}
 	router.HandleFunc("/chat/ws", service.ServeWs())
 	router.HandleFunc("GET /chat/history", service.GetHistory())
@@ -57,6 +60,18 @@ func (s *ChatHandler) ServeWs() http.HandlerFunc {
 		if err != nil {
 			log.Printf("ServeWs Error: invalid token: %v", err)
 			http.Error(w, "Invalid auth token", http.StatusUnauthorized)
+			return
+		}
+
+		isParticipant, err := s.matchProvider.IsUserInMatch(userID, uint(matchID))
+		if err != nil {
+			log.Printf("ServeWs Error: failed to check match participation for user %d in match %d: %v", userID, matchID, err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		if !isParticipant {
+			log.Printf("ServeWs Forbidden: user %d tried to access chat for match %d", userID, matchID)
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 			return
 		}
 
@@ -103,6 +118,7 @@ func (s *ChatHandler) ServeWs() http.HandlerFunc {
 // @Route        /chat/history [get]
 func (s *ChatHandler) GetHistory() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		userID := utilits.GetIdContext(w, r)
 		limitStr := r.URL.Query().Get("limit")
 		limit, err := strconv.Atoi(limitStr)
 		if err != nil {
@@ -115,6 +131,19 @@ func (s *ChatHandler) GetHistory() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
+
+		isParticipant, err := s.matchProvider.IsUserInMatch(userID, uint(matchID))
+		if err != nil {
+			log.Printf("GetHistory Error: failed to check match participation for user %d in match %d: %v", userID, matchID, err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		if !isParticipant {
+			log.Printf("GetHistory Forbidden: user %d tried to access history for match %d", userID, matchID)
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			return
+		}
+
 		messages, err := s.chatStorage.GetMessageHistory(uint(matchID), limit)
 		if err != nil {
 			log.Printf("Failed to get messages: %v", err)

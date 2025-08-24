@@ -34,3 +34,11 @@ func (service *MatchService) Create(userID1, userID2 uint) error {
 	}
 	return nil
 }
+
+func (service *MatchService) IsUserInMatch(userID uint, matchID uint) (bool, error) {
+	exists, err := service.matchStorage.IsUserInMatch(userID, matchID)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
