@@ -12,6 +12,7 @@ import (
 	"dating_service/internal/filter"
 	"dating_service/internal/like"
 	"dating_service/internal/match"
+	"dating_service/internal/notifier"
 	"dating_service/internal/photo"
 	"dating_service/internal/profile"
 	"dating_service/internal/recommendations"
@@ -67,6 +68,9 @@ func main() {
 	matchRepository := match.NewMatchRepository(db)
 	chatRepository := chat.NewChatRepository(db)
 	activityRepository := activity.NewActivityRepository(db)
+	//ws-hub
+	notifierHub := notifier.NewHub()
+	go notifierHub.Run()
 	//service
 	photoS3Service := filestorage.NewS3FileStorage(photoS3Client, config)
 	photoService := photo.NewPhotoService(photoRepository, photoS3Service)
@@ -78,6 +82,8 @@ func main() {
 	actionService := action.NewActionsService(userService, actionsRepository)
 	matchService := match.NewMatchService(matchRepository)
 	likeService := like.NewLikeService(likeRepository, userService, matchService)
+	activityService := activity.NewActivityService(activityRepository)
+	notifierService := notifier.NewNotifierService(notifierHub, activityService, matchService)
 	//background tasks
 	go func() {
 		ticker := time.NewTicker(24 * time.Hour)
@@ -87,6 +93,7 @@ func main() {
 			<-ticker.C
 		}
 	}()
+
 	//handler-public
 	fileServer := http.FileServer(http.Dir("./"))
 	publicRouter.Handle("/swagger/oas.yaml", http.StripPrefix("/swagger/", fileServer))
@@ -94,8 +101,8 @@ func main() {
 		httpSwagger.URL("/swagger/oas.yaml"),
 	))
 	auth.NewAuthHandler(publicRouter, authService)
+	notifier.NewNotifyHandler(publicRouter, notifierService, config)
 	chat.NewChatHandlerWs(publicRouter, chatRepository, matchService, config)
-	activity.NewActivityHandlerWs(publicRouter, activityRepository, matchService, config)
 	//handler-protected
 	profile.NewProfileHandler(protectedRouter, profileService, ctx)
 	filter.NewFilterHandler(protectedRouter, filterService)
@@ -118,7 +125,7 @@ func main() {
 	mainRouter.Handle("/auth/", publicRouter)
 	mainRouter.Handle("/swagger/", publicRouter)
 	mainRouter.Handle("/chat/ws", publicRouter)
-	mainRouter.Handle("/activity/ws", publicRouter)
+	mainRouter.Handle("/notifier/ws", publicRouter)
 	mainRouter.Handle("/", protectedStackMiddleware(protectedRouter))
 	//start-server
 	server := http.Server{

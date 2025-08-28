@@ -1,7 +1,8 @@
-package activity
+package notifier
 
 import (
 	"github.com/gorilla/websocket"
+	"log"
 	"time"
 )
 
@@ -13,29 +14,36 @@ const (
 
 type Client struct {
 	ID   uint
-	Hub  *Hub
 	Conn *websocket.Conn
 	Send chan []byte
 }
 
-func (c *Client) readPump() {
-	defer func() {
-		c.Hub.unregister <- c
-		c.Conn.Close()
-	}()
+func NewClient(id uint, conn *websocket.Conn) *Client {
+	return &Client{
+		ID:   id,
+		Conn: conn,
+		Send: make(chan []byte, 256),
+	}
+}
+
+func (c *Client) ReadPump() {
+	defer c.Conn.Close()
 	c.Conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.Conn.SetPongHandler(func(string) error {
 		c.Conn.SetReadDeadline(time.Now().Add(pongWait))
 		return nil
 	})
 	for {
-		if _, _, err := c.Conn.NextReader(); err != nil {
+		if _, _, err := c.Conn.ReadMessage(); err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("error: %v", err)
+			}
 			break
 		}
 	}
 }
 
-func (c *Client) writePump() {
+func (c *Client) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
@@ -58,5 +66,13 @@ func (c *Client) writePump() {
 				return
 			}
 		}
+	}
+}
+
+func (c *Client) SafeSend(message []byte) {
+	select {
+	case c.Send <- message:
+	default:
+		log.Printf("Client %d send channel is full. Message dropped.", c.ID)
 	}
 }
