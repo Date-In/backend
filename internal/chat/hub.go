@@ -1,28 +1,27 @@
 package chat
 
 import (
-	"dating_service/internal/model"
-	"encoding/json"
 	"log"
 )
 
 type Hub struct {
-	ID          uint
-	clients     map[*Client]bool
-	broadcast   chan *model.Message
-	register    chan *Client
-	unregister  chan *Client
-	chatStorage ChatStorage
+	ID           uint
+	clients      map[*Client]bool
+	processEvent chan *EventWithSender
+	register     chan *Client
+	unregister   chan *Client
+
+	processor MessageProcessor
 }
 
-func NewHub(id uint, chatStorage ChatStorage) *Hub {
+func NewHub(id uint, processor MessageProcessor) *Hub {
 	return &Hub{
-		ID:          id,
-		clients:     make(map[*Client]bool),
-		broadcast:   make(chan *model.Message),
-		register:    make(chan *Client),
-		unregister:  make(chan *Client),
-		chatStorage: chatStorage,
+		ID:           id,
+		clients:      make(map[*Client]bool),
+		processEvent: make(chan *EventWithSender),
+		register:     make(chan *Client),
+		unregister:   make(chan *Client),
+		processor:    processor,
 	}
 }
 
@@ -36,18 +35,33 @@ func (h *Hub) Run() {
 				delete(h.clients, client)
 				close(client.Send)
 			}
-		case message := <-h.broadcast:
-			if err := h.chatStorage.SaveMessage(message); err != nil {
-				log.Printf("failed to save message: %v", err)
+		case eventWithSender := <-h.processEvent:
+			if err := h.processor.ProcessEvent(h, eventWithSender); err != nil {
+				log.Printf("hub failed to process event for match %d: %v", h.ID, err)
 			}
-			jsonMsg, _ := json.Marshal(message)
-			for client := range h.clients {
-				select {
-				case client.Send <- jsonMsg:
-				default:
-					close(client.Send)
-					delete(h.clients, client)
-				}
+		}
+	}
+}
+
+func (h *Hub) Broadcast(message []byte) {
+	for client := range h.clients {
+		select {
+		case client.Send <- message:
+		default:
+			close(client.Send)
+			delete(h.clients, client)
+		}
+	}
+}
+
+func (h *Hub) BroadcastExcept(message []byte, sender *Client) {
+	for client := range h.clients {
+		if client != sender {
+			select {
+			case client.Send <- message:
+			default:
+				close(client.Send)
+				delete(h.clients, client)
 			}
 		}
 	}

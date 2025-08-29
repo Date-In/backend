@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"dating_service/internal/model"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
@@ -21,7 +20,6 @@ type Client struct {
 	Send chan []byte
 }
 
-// то что написал клиент чтобы отправить
 func (c *Client) readPump() {
 	defer func() {
 		c.Hub.unregister <- c
@@ -36,30 +34,22 @@ func (c *Client) readPump() {
 	})
 
 	for {
-		var msgIn struct {
-			MessageText string `json:"messageText"`
-		}
-
-		err := c.Conn.ReadJSON(&msgIn)
+		var event EventMessage
+		err := c.Conn.ReadJSON(&event)
 		if err != nil {
-			log.Printf("error reading json: %v", err)
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("unexpected close error: %v", err)
 			}
 			break
 		}
-		msg := &model.Message{
-			MessageText: msgIn.MessageText,
-			SenderID:    c.ID,
-			MatchID:     c.Hub.ID,
-			IsRead:      false,
+		eventWithSender := &EventWithSender{
+			Event:  &event,
+			Sender: c,
 		}
-
-		c.Hub.broadcast <- msg
+		c.Hub.processEvent <- eventWithSender
 	}
 }
 
-// То что написали нам
 func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
@@ -75,11 +65,7 @@ func (c *Client) writePump() {
 				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-
-			if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
-				return
-			}
-
+			c.Conn.WriteMessage(websocket.TextMessage, message)
 		case <-ticker.C:
 			c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {

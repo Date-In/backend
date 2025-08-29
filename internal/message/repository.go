@@ -1,24 +1,24 @@
-package chat
+package message
 
 import (
 	"dating_service/internal/model"
 	"dating_service/pkg/db"
 )
 
-type ChatRepository struct {
+type MessageRepository struct {
 	db *db.Db
 }
 
-func NewChatRepository(db *db.Db) *ChatRepository {
-	return &ChatRepository{db}
+func NewMessageRepository(db *db.Db) *MessageRepository {
+	return &MessageRepository{db}
 }
 
-func (r *ChatRepository) SaveMessage(message *model.Message) error {
+func (r *MessageRepository) Save(message *model.Message) error {
 	result := r.db.PgDb.Create(message)
 	return result.Error
 }
 
-func (r *ChatRepository) GetMessageHistory(matchID uint, limit int) ([]*model.Message, error) {
+func (r *MessageRepository) GetHistory(matchID uint, limit int) ([]*model.Message, error) {
 	var messages []*model.Message
 
 	err := r.db.PgDb.Where("match_id = ?", matchID).

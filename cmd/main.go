@@ -12,6 +12,7 @@ import (
 	"dating_service/internal/filter"
 	"dating_service/internal/like"
 	"dating_service/internal/match"
+	"dating_service/internal/message"
 	"dating_service/internal/notifier"
 	"dating_service/internal/photo"
 	"dating_service/internal/profile"
@@ -66,7 +67,7 @@ func main() {
 	actionsRepository := action.NewActionsRepository(db)
 	likeRepository := like.NewLikeRepository(db)
 	matchRepository := match.NewMatchRepository(db)
-	chatRepository := chat.NewChatRepository(db)
+	messageRepository := message.NewMessageRepository(db)
 	activityRepository := activity.NewActivityRepository(db)
 	//ws-hub
 	notifierHub := notifier.NewHub()
@@ -83,6 +84,8 @@ func main() {
 	matchService := match.NewMatchService(matchRepository)
 	likeService := like.NewLikeService(likeRepository, userService, matchService)
 	activityService := activity.NewActivityService(activityRepository)
+	messageService := message.NewMessageService(messageRepository)
+	chatService := chat.NewService(matchService, messageService)
 	notifierService := notifier.NewNotifierService(notifierHub, activityService, matchService)
 	//background tasks
 	go func() {
@@ -102,14 +105,14 @@ func main() {
 	))
 	auth.NewAuthHandler(publicRouter, authService)
 	notifier.NewNotifyHandler(publicRouter, notifierService, config)
-	chat.NewChatHandlerWs(publicRouter, chatRepository, matchService, config)
+	chat.NewChatHandlerWs(publicRouter, chatService, config)
 	//handler-protected
 	profile.NewProfileHandler(protectedRouter, profileService, ctx)
 	filter.NewFilterHandler(protectedRouter, filterService)
 	recommendations.NewRecommendationHandler(protectedRouter, recommendationService)
 	like.NewLikeHandler(protectedRouter, likeService)
 	match.NewMatchHandler(protectedRouter, matchService)
-	chat.NewChatHandler(protectedRouter, chatRepository, matchService)
+	chat.NewChatHandler(protectedRouter, chatService)
 	//middlewares
 	authMiddleware := middleware.NewAuthMiddleware(*config)
 	checkBlockedUserMiddleware := middleware.NewCheckBlockedUserMiddleware(userRepository)

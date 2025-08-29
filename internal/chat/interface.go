@@ -1,6 +1,9 @@
 package chat
 
-import "dating_service/internal/model"
+import (
+	"dating_service/internal/model"
+	"github.com/gorilla/websocket"
+)
 
 type ChatStorage interface {
 	SaveMessage(*model.Message) error
@@ -9,4 +12,18 @@ type ChatStorage interface {
 
 type MatchProvider interface {
 	IsUserInMatch(uint, uint) (bool, error)
+}
+
+type MessageProcessor interface {
+	ProcessEvent(hub *Hub, event *EventWithSender) error
+}
+
+type MessageProvider interface {
+	CreateAndSaveMessage(message *model.Message) error
+	GetHistory(matchID uint, limit int) ([]*model.Message, error)
+}
+
+type ChatProvider interface {
+	HandleNewConnection(uint, uint, *websocket.Conn)
+	GetMessageHistory(uint, uint, int) ([]*model.Message, error)
 }
