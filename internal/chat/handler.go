@@ -76,6 +76,6 @@ func (h *ChatHandler) GetHistory() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-		res.Json(w, messages, http.StatusOK)
+		res.Json(w, MessagesToMessagesDto(messages), http.StatusOK)
 	}
 }

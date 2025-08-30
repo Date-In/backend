@@ -7,4 +7,5 @@ type MatchStorage interface {
 	GetAllWithDetails(uint) ([]model.Match, error)
 	IsUserInMatch(uint, uint) (bool, error)
 	GetMatchUserIDs(uint) ([]uint, error)
+	GetUsers(matchID uint) ([]model.User, error)
 }

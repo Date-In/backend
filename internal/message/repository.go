@@ -13,9 +13,12 @@ func NewMessageRepository(db *db.Db) *MessageRepository {
 	return &MessageRepository{db}
 }
 
-func (r *MessageRepository) Save(message *model.Message) error {
+func (r *MessageRepository) Save(message *model.Message) (*model.Message, error) {
 	result := r.db.PgDb.Create(message)
-	return result.Error
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return message, nil
 }
 
 func (r *MessageRepository) GetHistory(matchID uint, limit int) ([]*model.Message, error) {

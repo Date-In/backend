@@ -91,3 +91,23 @@ func (r *MatchRepository) GetMatchUserIDs(userID uint) ([]uint, error) {
 	partnerIDs = append(partnerIDs, partnerIDsFromUser2...)
 	return partnerIDs, nil
 }
+
+func (repo *MatchRepository) GetUsers(matchID uint) ([]model.User, error) {
+	var match model.Match
+
+	err := repo.db.PgDb.
+		Preload("User1").
+		Preload("User2").
+		First(&match, matchID).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("match not found")
+		}
+		return nil, err
+	}
+
+	users := []model.User{match.User1, match.User2}
+
+	return users, nil
+}

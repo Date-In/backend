@@ -50,3 +50,7 @@ func (service *MatchService) GetMatchUserIDs(userID uint) ([]uint, error) {
 	}
 	return matchIds, nil
 }
+
+func (service *MatchService) GetUsers(matchID uint) ([]model.User, error) {
+	return service.matchStorage.GetUsers(matchID)
+}

@@ -85,8 +85,8 @@ func main() {
 	likeService := like.NewLikeService(likeRepository, userService, matchService)
 	activityService := activity.NewActivityService(activityRepository)
 	messageService := message.NewMessageService(messageRepository)
-	chatService := chat.NewService(matchService, messageService)
 	notifierService := notifier.NewNotifierService(notifierHub, activityService, matchService)
+	chatService := chat.NewService(matchService, messageService, notifierService)
 	//background tasks
 	go func() {
 		ticker := time.NewTicker(24 * time.Hour)

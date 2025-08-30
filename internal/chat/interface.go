@@ -12,6 +12,7 @@ type ChatStorage interface {
 
 type MatchProvider interface {
 	IsUserInMatch(uint, uint) (bool, error)
+	GetUsers(uint) ([]model.User, error)
 }
 
 type MessageProcessor interface {
@@ -19,11 +20,15 @@ type MessageProcessor interface {
 }
 
 type MessageProvider interface {
-	CreateAndSaveMessage(message *model.Message) error
+	CreateAndSaveMessage(message *model.Message) (*model.Message, error)
 	GetHistory(matchID uint, limit int) ([]*model.Message, error)
 }
 
 type ChatProvider interface {
 	HandleNewConnection(uint, uint, *websocket.Conn)
 	GetMessageHistory(uint, uint, int) ([]*model.Message, error)
+}
+
+type Notify interface {
+	NotifyUser(userID uint, eventType string, payload interface{})
 }
