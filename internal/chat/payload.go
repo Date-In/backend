@@ -10,3 +10,9 @@ type MessageDto struct {
 	MatchID     uint      `json:"match_id"`
 	SenderID    uint      `json:"sender_id"`
 }
+
+type MessageIsRead struct {
+	MessagesId []uint `json:"messages_id"`
+	MatchId    uint   `json:"match_id"`
+	SenderID   uint   `json:"sender_id"`
+}

@@ -23,3 +23,7 @@ func (s *MessageService) CreateAndSaveMessage(msg *model.Message) (*model.Messag
 func (s *MessageService) GetHistory(matchID uint, limit int) ([]*model.Message, error) {
 	return s.messageStorage.GetHistory(matchID, limit)
 }
+
+func (s *MessageService) MarkMessageIsRead(messagesID []uint) error {
+	return s.messageStorage.MarkMessageIsRead(messagesID)
+}

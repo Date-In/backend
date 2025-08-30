@@ -9,6 +9,11 @@ import (
 	"sync"
 )
 
+const (
+	eventMessageIsRead = "message_read"
+	eventNewMessage    = "new_message"
+)
+
 var ErrForbidden = errors.New("user is not a participant in this match")
 
 type ChatService struct {
@@ -79,8 +84,13 @@ func (s *ChatService) ProcessEvent(hub *Hub, eventData *EventWithSender) error {
 	event := eventData.Event
 	sender := eventData.Sender
 	switch event.EventType {
-	case "new_message":
+	case eventNewMessage:
 		err := s.processMessage(event, sender, hub)
+		if err != nil {
+			return err
+		}
+	case eventMessageIsRead:
+		err := s.MarkMessageIsRead(event, sender, hub)
 		if err != nil {
 			return err
 		}
@@ -129,6 +139,32 @@ func (s *ChatService) processMessage(event *EventMessage, sender *Client, hub *H
 	return nil
 }
 
+func (s *ChatService) MarkMessageIsRead(event *EventMessage, sender *Client, hub *Hub) error {
+	var payload struct {
+		MessagesID []uint `json:"messages_id"`
+	}
+	err := json.Unmarshal(event.Payload, &payload)
+	if err != nil {
+		return err
+	}
+	err = s.messageProvider.MarkMessageIsRead(payload.MessagesID)
+	if err != nil {
+		return err
+	}
+	res := MessageIsRead{
+		MessagesId: payload.MessagesID,
+		MatchId:    hub.ID,
+		SenderID:   sender.ID,
+	}
+	jsonMsg, err := json.Marshal(res)
+	newEvent := EventMessage{
+		EventType: event.EventType,
+		Payload:   jsonMsg,
+	}
+	s.notifyMessageIsRead(&newEvent, sender, hub)
+	return nil
+}
+
 func (s *ChatService) notifyNewMessage(event *EventMessage, sender *Client, hub *Hub) {
 	secondUserOnline := false
 	for client, _ := range hub.clients {
@@ -157,4 +193,24 @@ func (s *ChatService) notifyNewMessage(event *EventMessage, sender *Client, hub 
 		}
 		s.notify.NotifyUser(recipientId, event.EventType, event.Payload)
 	}
+}
+
+func (s *ChatService) notifyMessageIsRead(event *EventMessage, sender *Client, hub *Hub) {
+	users, err := s.matchProvider.GetUsers(hub.ID)
+	if err != nil {
+		log.Printf("Service Error: failed to get match users: %v", err)
+		return
+	}
+	var recipientId uint
+	if len(users) > 0 {
+		if users[0].ID == sender.ID {
+			recipientId = users[1].ID
+		} else {
+			recipientId = users[0].ID
+		}
+	} else {
+		log.Printf("Service Error: failed to get match users: %v", ErrForbidden)
+		return
+	}
+	s.notify.NotifyUser(recipientId, event.EventType, event.Payload)
 }

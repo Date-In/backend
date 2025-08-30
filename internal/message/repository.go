@@ -3,6 +3,8 @@ package message
 import (
 	"dating_service/internal/model"
 	"dating_service/pkg/db"
+	"errors"
+	"gorm.io/gorm"
 )
 
 type MessageRepository struct {
@@ -36,4 +38,17 @@ func (r *MessageRepository) GetHistory(matchID uint, limit int) ([]*model.Messag
 		messages[i], messages[j] = messages[j], messages[i]
 	}
 	return messages, nil
+}
+
+func (r *MessageRepository) MarkMessageIsRead(messagesID []uint) error {
+	err := r.db.PgDb.Model(&model.Message{}).
+		Where("id IN ?", messagesID).
+		Update("is_read", true).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
