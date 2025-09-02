@@ -13,5 +13,6 @@ type MatchProvider interface {
 type LikeStorage interface {
 	GetLikes(uint) ([]model.Like, error)
 	CreateLike(uint, uint) error
+	DeleteLike(uint, uint) error
 	FindLikeByTargetIdAndUserID(uint, uint) (*model.Like, error)
 }

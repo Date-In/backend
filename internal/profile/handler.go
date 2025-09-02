@@ -172,7 +172,6 @@ func (h *Handler) UpdateInterests() http.HandlerFunc {
 // AddPhoto godoc
 // @Title        Добавить фотографию в профиль
 // @Description  Загружает файл фотографии для текущего пользователя. Принимает multipart/form-data с ключом "photo".
-// @Param        photo file file true "Файл фотографии для загрузки"
 // @Success      201 {string} string "UUID созданной фотографии"
 // @Failure      400 {string} string "Некорректный запрос (например, файл не предоставлен)"
 // @Failure      401 {string} string "Пользователь не авторизован"

@@ -3,8 +3,9 @@ package like
 import (
 	"dating_service/internal/model"
 	"dating_service/pkg/db"
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Repository struct {
@@ -40,6 +41,17 @@ func (r *Repository) CreateLike(userId uint, targetId uint) error {
 	}).Error
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (r *Repository) DeleteLike(userId uint, targetId uint) error {
+	result := r.db.PgDb.Where("user_id = ? AND target_id = ?", userId, targetId).Delete(&model.Like{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return ErrNotFoundLike
 	}
 	return nil
 }

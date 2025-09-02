@@ -47,6 +47,14 @@ func (s *Service) CreateLike(userId, targetId uint) error {
 	return nil
 }
 
+func (s *Service) DeleteLike(userId, targetId uint) error {
+	err := s.likeStorage.DeleteLike(userId, targetId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *Service) GetLikes(userId uint) ([]model.Like, error) {
 	likesId, err := s.likeStorage.GetLikes(userId)
 	if err != nil {

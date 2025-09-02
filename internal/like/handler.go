@@ -15,6 +15,7 @@ type Handler struct {
 func NewHandler(router *http.ServeMux, service *Service) {
 	handler := &Handler{service}
 	router.HandleFunc("POST /like/{target_id}", handler.CreateLike())
+	router.HandleFunc("DELETE /like/{target_id}", handler.DeleteLike())
 	router.HandleFunc("GET /like/all", handler.GetLike())
 }
 
@@ -48,6 +49,41 @@ func (h *Handler) CreateLike() http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+// DeleteLike godoc
+// @Title        Удалить лайк
+// @Description  Текущий авторизованный пользователь удаляет свой лайк, поставленный другому пользователю.
+// @Param        target_id path int true "ID пользователя, у которого нужно убрать лайк"
+// @Success      204 {string} string "No Content - Лайк успешно удален"
+// @Failure      400 {string} string "Неверный ID пользователя в URL"
+// @Failure      401 {string} string "Пользователь не авторизован"
+// @Failure      404 {string} string "Лайк не найден"
+// @Failure      500 {string} string "Внутренняя ошибка сервера"
+// @Security     AuthorizationHeader
+// @Resource     Likes
+// @Route        /like/{target_id} [delete]
+func (h *Handler) DeleteLike() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userId := utilits.GetIdContext(w, r)
+		targetIdStr := r.PathValue("target_id")
+		targetId, err := strconv.ParseUint(targetIdStr, 10, 64)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+		err = h.service.DeleteLike(userId, uint(targetId))
+		if err != nil {
+			switch {
+			case errors.Is(err, ErrNotFoundLike):
+				http.Error(w, err.Error(), http.StatusNotFound)
+			default:
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 

@@ -23,10 +23,11 @@ import (
 	"dating_service/pkg/cryptohelper"
 	db2 "dating_service/pkg/db"
 	"dating_service/pkg/middleware"
-	httpSwagger "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
 	"time"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // @Title API для Сервиса Знакомств
@@ -34,8 +35,8 @@ import (
 // @Description Это серверная часть для приложения знакомств. Все эндпоинты, требующие авторизации, ожидают JWT токен в заголовке 'Authorization: Bearer {token}'.
 // @TermsOfServiceUrl http://swagger.io/terms/
 
-// @ContactName Ваше Имя
-// @ContactEmail ваш.email@example.com
+// @ContactName SWH MDG
+// @ContactEmail suai@spb.ru
 
 // @LicenseName Apache 2.0
 // @LicenseUrl http://www.apache.org/licenses/LICENSE-2.0.html

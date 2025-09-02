@@ -622,8 +622,73 @@
             }
           }
         ]
-      }
+      },
+        "delete": {
+          "tags": [
+            "Likes"
+          ],
+          "summary": "Удалить лайк",
+          "description": "Текущий авторизованный пользователь удаляет свой лайк, поставленный другому пользователю.",
+          "parameters": [
+            {
+              "name": "target_id",
+              "in": "path",
+              "description": "ID пользователя, у которого нужно убрать лайк",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "No Content - Лайк успешно удален"
+            },
+            "400": {
+              "description": "Неверный ID пользователя в URL",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Пользователь не авторизован",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Лайк не найден",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Внутренняя ошибка сервера",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
     },
+
     "/matches/all": {
       "get": {
         "responses": {
