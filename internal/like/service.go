@@ -10,7 +10,7 @@ type Service struct {
 	matchProvider MatchProvider
 }
 
-func NewLikeService(likeStorage LikeStorage, userProvider UserProvider, matchProvider MatchProvider) *Service {
+func NewService(likeStorage LikeStorage, userProvider UserProvider, matchProvider MatchProvider) *Service {
 	return &Service{likeStorage, userProvider, matchProvider}
 }
 

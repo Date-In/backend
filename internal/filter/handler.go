@@ -12,7 +12,7 @@ type Handler struct {
 	service *Service
 }
 
-func NewFilterHandler(router *http.ServeMux, service *Service) {
+func NewHandler(router *http.ServeMux, service *Service) {
 	handler := &Handler{service: service}
 	router.Handle("GET /filter", handler.GetFilter())
 	router.Handle("POST /filter/create", handler.CreateFilter())
@@ -29,7 +29,7 @@ func NewFilterHandler(router *http.ServeMux, service *Service) {
 // @Security     AuthorizationHeader
 // @Resource     Filters
 // @Route        /filter/create [post]
-func (handler *Handler) CreateFilter() http.HandlerFunc {
+func (h *Handler) CreateFilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		body, err := req.HandleBody[CreateFilterDto](r)
@@ -37,7 +37,7 @@ func (handler *Handler) CreateFilter() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		err = handler.service.CreateFilter(userId, body.MinAge, body.MaxAge, body.SexID, body.Location)
+		err = h.service.CreateFilter(userId, body.MinAge, body.MaxAge, body.SexID, body.Location)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrMaxAndMinValue):
@@ -64,14 +64,14 @@ func (handler *Handler) CreateFilter() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Filters
 // @Route        /filter/update [patch]
-func (handler *Handler) UpdateFilter() http.HandlerFunc {
+func (h *Handler) UpdateFilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		body, err := req.HandleBody[UpdateFilterDto](r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
-		err = handler.service.UpdateUserFilter(userId, body.MinAge, body.MaxAge, body.SexId, body.Location)
+		err = h.service.UpdateUserFilter(userId, body.MinAge, body.MaxAge, body.SexId, body.Location)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrNotFoundFilter):
@@ -96,10 +96,10 @@ func (handler *Handler) UpdateFilter() http.HandlerFunc {
 // @Security     ApiKeyAuth
 // @Resource     Filters
 // @Route        /filter [get]
-func (handler *Handler) GetFilter() http.HandlerFunc {
+func (h *Handler) GetFilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
-		filter, err := handler.service.GetFilter(userId)
+		filter, err := h.service.GetFilter(userId)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrNotFoundFilter):

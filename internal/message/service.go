@@ -8,7 +8,7 @@ type Service struct {
 	messageStorage MessageStorage
 }
 
-func NewMessageService(messageStorage MessageStorage) *Service {
+func NewService(messageStorage MessageStorage) *Service {
 	return &Service{messageStorage: messageStorage}
 }
 

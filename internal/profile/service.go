@@ -13,7 +13,7 @@ type Service struct {
 	cache         CacheProvider
 }
 
-func NewProfileService(userProvider UserProvider, photoProvider PhotoProvider, cache CacheProvider) *Service {
+func NewService(userProvider UserProvider, photoProvider PhotoProvider, cache CacheProvider) *Service {
 	return &Service{userProvider, photoProvider, cache}
 }
 

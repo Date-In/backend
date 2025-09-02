@@ -12,7 +12,7 @@ type Repository struct {
 	db *db.Db
 }
 
-func NewMatchRepository(db *db.Db) *Repository {
+func NewRepository(db *db.Db) *Repository {
 	return &Repository{db}
 }
 

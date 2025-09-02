@@ -10,7 +10,7 @@ type Repository struct {
 	db *db.Db
 }
 
-func NewActionsRepository(db *db.Db) *Repository {
+func NewRepository(db *db.Db) *Repository {
 	return &Repository{db}
 }
 

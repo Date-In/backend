@@ -17,7 +17,7 @@ type Handler struct {
 	ctx     context.Context
 }
 
-func NewProfileHandler(router *http.ServeMux, service *Service, ctx context.Context) {
+func NewHandler(router *http.ServeMux, service *Service, ctx context.Context) {
 	handler := &Handler{service: service, ctx: ctx}
 	router.Handle("GET /profile", handler.GetInfo())
 	router.Handle("GET /profile/{userId}", handler.GetProfileUser())
@@ -38,10 +38,10 @@ func NewProfileHandler(router *http.ServeMux, service *Service, ctx context.Cont
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile [get]
-func (handler *Handler) GetInfo() http.HandlerFunc {
+func (h *Handler) GetInfo() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
-		user, err := handler.service.GetInfo(userID)
+		user, err := h.service.GetInfo(userID)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrUserNotFound):
@@ -65,11 +65,11 @@ func (handler *Handler) GetInfo() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile/{userId} [get]
-func (handler *Handler) GetProfileUser() http.HandlerFunc {
+func (h *Handler) GetProfileUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userIdStr := r.PathValue("userId")
 		userId, err := strconv.ParseUint(userIdStr, 10, 64)
-		user, err := handler.service.GetInfo(uint(userId))
+		user, err := h.service.GetInfo(uint(userId))
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrUserNotFound):
@@ -91,7 +91,7 @@ func (handler *Handler) GetProfileUser() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile [patch]
-func (handler *Handler) UpdateProfile() http.HandlerFunc {
+func (h *Handler) UpdateProfile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		body, err := req.HandleBody[UpdateInfoRequestDto](r)
@@ -99,7 +99,7 @@ func (handler *Handler) UpdateProfile() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		updatedUser, err := handler.service.Update(userID,
+		updatedUser, err := h.service.Update(userID,
 			body.Name,
 			body.Age,
 			body.Bio,
@@ -148,14 +148,14 @@ func (handler *Handler) UpdateProfile() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile/interests [put]
-func (handler *Handler) UpdateInterests() http.HandlerFunc {
+func (h *Handler) UpdateInterests() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		body, err := req.HandleBody[UpdateInterestRequestDto](r)
 		if err != nil {
 			return
 		}
-		updatedInterests, err := handler.service.UpdateInterests(userID, body.InterestIDs)
+		updatedInterests, err := h.service.UpdateInterests(userID, body.InterestIDs)
 		if err != nil {
 			if errors.Is(err, ErrInvalidInterestId) {
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -182,7 +182,7 @@ func (handler *Handler) UpdateInterests() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile/photos [post]
-func (handler *Handler) AddPhoto() http.HandlerFunc {
+func (h *Handler) AddPhoto() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		if err := r.ParseMultipartForm(10 << 20); err != nil {
@@ -202,7 +202,7 @@ func (handler *Handler) AddPhoto() http.HandlerFunc {
 			return
 		}
 
-		photoID, err := handler.service.AddPhoto(handler.ctx, userID, data, fileHeader.Filename)
+		photoID, err := h.service.AddPhoto(h.ctx, userID, data, fileHeader.Filename)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrLimitPhoto):
@@ -230,11 +230,11 @@ func (handler *Handler) AddPhoto() http.HandlerFunc {
 // @Security AuthorizationHeader
 // @Resource Profile
 // @Route /profile/photo/{photoId} [delete]
-func (handler *Handler) DeletePhoto() http.HandlerFunc {
+func (h *Handler) DeletePhoto() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		photoID := r.PathValue("photoId")
 		userID := utilits.GetIdContext(w, r)
-		err := handler.service.DeletePhoto(handler.ctx, photoID, userID)
+		err := h.service.DeletePhoto(h.ctx, photoID, userID)
 		if err != nil {
 			if errors.Is(err, ErrPhotoNotFound) {
 				http.Error(w, err.Error(), http.StatusNotFound)
@@ -258,11 +258,11 @@ func (handler *Handler) DeletePhoto() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile/photo/change-avatar/{photoId} [patch]
-func (handler *Handler) UpdateAvatar() http.HandlerFunc {
+func (h *Handler) UpdateAvatar() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		photoID := r.PathValue("photoId")
-		newAvatar, err := handler.service.UpdateAvatar(photoID, userID)
+		newAvatar, err := h.service.UpdateAvatar(photoID, userID)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrPhotoNotFound):
@@ -286,10 +286,10 @@ func (handler *Handler) UpdateAvatar() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile/avatar [get]
-func (handler *Handler) getAvatar() http.HandlerFunc {
+func (h *Handler) getAvatar() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
-		avatarId, err := handler.service.GetAvatar(userID)
+		avatarId, err := h.service.GetAvatar(userID)
 		if avatarId == "" {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		}

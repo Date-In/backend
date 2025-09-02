@@ -11,7 +11,7 @@ type Service struct {
 	s3Provider   S3Provider
 }
 
-func NewPhotoService(photoStorage PhotoStorage, s3Provider S3Provider) *Service {
+func NewService(photoStorage PhotoStorage, s3Provider S3Provider) *Service {
 	return &Service{
 		photoStorage, s3Provider,
 	}

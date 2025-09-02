@@ -8,7 +8,7 @@ type Service struct {
 	filterStorage FilterStorage
 }
 
-func NewFilterService(filterStorage FilterStorage) *Service {
+func NewService(filterStorage FilterStorage) *Service {
 	return &Service{filterStorage: filterStorage}
 }
 

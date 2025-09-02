@@ -10,7 +10,7 @@ type Service struct {
 	filterProvider FilterProvider
 }
 
-func NewRecommendationService(userProvider UserProvider, filterProvider FilterProvider) *Service {
+func NewService(userProvider UserProvider, filterProvider FilterProvider) *Service {
 	return &Service{userProvider, filterProvider}
 }
 

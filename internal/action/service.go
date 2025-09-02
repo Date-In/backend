@@ -9,7 +9,7 @@ type Service struct {
 	actionStorage ActionStorage
 }
 
-func NewActionsService(userProvider UserProvider, actionStorage ActionStorage) *Service {
+func NewService(userProvider UserProvider, actionStorage ActionStorage) *Service {
 	return &Service{userProvider, actionStorage}
 }
 

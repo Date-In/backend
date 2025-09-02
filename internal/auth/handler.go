@@ -11,7 +11,7 @@ type Handler struct {
 	service *Service
 }
 
-func NewAuthHandler(router *http.ServeMux, service *Service) {
+func NewHandler(router *http.ServeMux, service *Service) {
 	handler := &Handler{service}
 	router.HandleFunc("POST /auth/register", handler.Register())
 	router.HandleFunc("POST /auth/login", handler.Login())
@@ -24,7 +24,7 @@ func NewAuthHandler(router *http.ServeMux, service *Service) {
 // @Success      201 {string} string "JWT токен"
 // @Resource     Authentication
 // @Route        /auth/register [post]
-func (handler *Handler) Register() http.HandlerFunc {
+func (h *Handler) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := req.HandleBody[RegisterRequestDto](r)
 		if err != nil {
@@ -36,7 +36,7 @@ func (handler *Handler) Register() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		token, err := handler.service.Register(normalPhoneNumber, body.Name, body.Password, body.SexID, body.Age)
+		token, err := h.service.Register(normalPhoneNumber, body.Name, body.Password, body.SexID, body.Age)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrUserAlreadyExists):
@@ -61,7 +61,7 @@ func (handler *Handler) Register() http.HandlerFunc {
 // @Success      200 {string} string "eyJhbGciOiJIU..."
 // @Resource     Authentication
 // @Route        /auth/login [post]
-func (handler *Handler) Login() http.HandlerFunc {
+func (h *Handler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := req.HandleBody[LoginRequestDto](r)
 		if err != nil {
@@ -72,7 +72,7 @@ func (handler *Handler) Login() http.HandlerFunc {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
-		token, err := handler.service.Login(normalPhoneNumber, body.Password)
+		token, err := h.service.Login(normalPhoneNumber, body.Password)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrIncorrectPasswordOrPhone):

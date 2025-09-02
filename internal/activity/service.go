@@ -6,7 +6,7 @@ type Service struct {
 	activityStorage ActivityStorage
 }
 
-func NewActivityService(activityStorage ActivityStorage) *Service {
+func NewService(activityStorage ActivityStorage) *Service {
 	return &Service{activityStorage}
 }
 

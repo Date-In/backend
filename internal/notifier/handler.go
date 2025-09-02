@@ -13,7 +13,7 @@ type HandlerWs struct {
 	conf            *configs.Config
 }
 
-func NewNotifyHandler(
+func NewHandlerWs(
 	router *http.ServeMux,
 	service *Service,
 	conf *configs.Config,

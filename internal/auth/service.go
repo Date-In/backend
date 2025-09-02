@@ -15,7 +15,7 @@ type Service struct {
 	tokenManager *JWT.JWT
 }
 
-func NewAuthService(userProvider UserProvider, cache CacheProvider, tm *JWT.JWT) *Service {
+func NewService(userProvider UserProvider, cache CacheProvider, tm *JWT.JWT) *Service {
 	return &Service{userProvider: userProvider, cache: cache, tokenManager: tm}
 }
 

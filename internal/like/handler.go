@@ -12,7 +12,7 @@ type Handler struct {
 	service *Service
 }
 
-func NewLikeHandler(router *http.ServeMux, service *Service) {
+func NewHandler(router *http.ServeMux, service *Service) {
 	handler := &Handler{service}
 	router.HandleFunc("POST /like/{target_id}", handler.CreateLike())
 	router.HandleFunc("GET /like/all", handler.GetLike())
@@ -29,7 +29,7 @@ func NewLikeHandler(router *http.ServeMux, service *Service) {
 // @Security     AuthorizationHeader
 // @Resource     Likes
 // @Route        /like/{target_id} [post]
-func (handler *Handler) CreateLike() http.HandlerFunc {
+func (h *Handler) CreateLike() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		targetIdStr := r.PathValue("target_id")
@@ -37,7 +37,7 @@ func (handler *Handler) CreateLike() http.HandlerFunc {
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		}
-		err = handler.service.CreateLike(userId, uint(targetId))
+		err = h.service.CreateLike(userId, uint(targetId))
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrNotFoundUser):
@@ -60,10 +60,10 @@ func (handler *Handler) CreateLike() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Likes
 // @Route        /like/all [get]
-func (handler *Handler) GetLike() http.HandlerFunc {
+func (h *Handler) GetLike() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
-		likes, err := handler.service.GetLikes(userId)
+		likes, err := h.service.GetLikes(userId)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return

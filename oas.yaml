@@ -87,41 +87,21 @@
         }
       }
     },
-    "/chat/history": {
+    "/dict/attitude-to-alcohol": {
       "get": {
         "responses": {
           "200": {
-            "description": "Успешный ответ с массивом сообщений",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Неверный запрос (некорректные параметры)",
+            "description": "Список вариантов отношения к алкоголю",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Пользователь не авторизован",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/AttitudeToAlcohol"
                 }
               }
             }
           },
           "500": {
-            "description": "Внутренняя ошибка сервера",
+            "description": "Ошибка сервера",
             "content": {
               "application/json": {
                 "schema": {
@@ -132,34 +112,258 @@
           }
         },
         "tags": [
-          "Chat"
+          "Dictionaries"
         ],
-        "summary": "Получить историю сообщений для чата",
-        "description": " Возвращает постраничный список сообщений для указанного чата (матча).",
-        "parameters": [
-          {
-            "name": "match_id",
-            "in": "query",
-            "description": "ID чата (матча)",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "description": "ID чата (матча)"
+        "summary": "Получить список вариантов отношения к алкоголю",
+        "description": " Возвращает справочник отношения к алкоголю"
+      }
+    },
+    "/dict/attitude-to-smoking": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Список вариантов отношения к курению",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttitudeToSmoking"
+                }
+              }
             }
           },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Количество сообщений для загрузки",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "description": "Количество сообщений для загрузки"
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           }
-        ]
+        },
+        "tags": [
+          "Dictionaries"
+        ],
+        "summary": "Получить список вариантов отношения к курению",
+        "description": " Возвращает справочник отношения к курению"
+      }
+    },
+    "/dict/educations": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Список образований",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Education"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Dictionaries"
+        ],
+        "summary": "Получить список образований",
+        "description": " Возвращает справочник образований"
+      }
+    },
+    "/dict/interests": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Список интересов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Interest"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Dictionaries"
+        ],
+        "summary": "Получить список интересов",
+        "description": " Возвращает справочник интересов"
+      }
+    },
+    "/dict/sexes": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Список полов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sex"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Dictionaries"
+        ],
+        "summary": "Получить список полов",
+        "description": " Возвращает справочник полов"
+      }
+    },
+    "/dict/statuses": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Список статусов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Status"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Dictionaries"
+        ],
+        "summary": "Получить список статусов",
+        "description": " Возвращает справочник статусов"
+      }
+    },
+    "/dict/type-of-dating": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Список типов знакомств",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypeOfDating"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Dictionaries"
+        ],
+        "summary": "Получить список типов знакомств",
+        "description": " Возвращает справочник типов знакомств"
+      }
+    },
+    "/dict/worldviews": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Список мировоззрений",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Worldview"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Dictionaries"
+        ],
+        "summary": "Получить список мировоззрений",
+        "description": " Возвращает справочник мировоззрений"
+      }
+    },
+    "/dict/zodiac-signs": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Список знаков зодиака",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZodiacSign"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Dictionaries"
+        ],
+        "summary": "Получить список знаков зодиака",
+        "description": " Возвращает справочник знаков зодиака"
       }
     },
     "/filter": {
@@ -428,7 +632,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetAllDto"
+                  "$ref": "#/components/schemas/MatchPreviewDTO"
                 }
               }
             }
@@ -956,6 +1160,28 @@
   },
   "components": {
     "schemas": {
+      "AttitudeToAlcohol": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        }
+      },
+      "AttitudeToSmoking": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        }
+      },
       "CreateFilterDto": {
         "type": "object",
         "properties": {
@@ -973,25 +1199,14 @@
           }
         }
       },
-      "GetAllDto": {
+      "Education": {
         "type": "object",
         "properties": {
-          "matches": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "integer"
-                },
-                "user1_id": {
-                  "type": "integer"
-                },
-                "user2_id": {
-                  "type": "integer"
-                }
-              }
-            }
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
           }
         }
       },
@@ -1186,6 +1401,21 @@
           }
         }
       },
+      "LastMessageDTO": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "is_read": {
+            "type": "boolean"
+          }
+        }
+      },
       "LikeDto": {
         "type": "object",
         "properties": {
@@ -1239,17 +1469,34 @@
           }
         }
       },
-      "MatchDto": {
+      "MatchPreviewDTO": {
+        "type": "object",
+        "properties": {
+          "match_id": {
+            "type": "integer"
+          },
+          "partner": {
+            "type": "object",
+            "$ref": "#/components/schemas/PartnerDTO"
+          },
+          "last_message": {
+            "type": "object",
+            "$ref": "#/components/schemas/LastMessageDTO"
+          }
+        }
+      },
+      "PartnerDTO": {
         "type": "object",
         "properties": {
           "id": {
             "type": "integer"
           },
-          "user1_id": {
-            "type": "integer"
+          "name": {
+            "type": "string"
           },
-          "user2_id": {
-            "type": "integer"
+          "avatar": {
+            "type": "object",
+            "$ref": "#/components/schemas/PhotoDto"
           }
         }
       },
@@ -1292,6 +1539,39 @@
           },
           "sex_id": {
             "type": "integer"
+          }
+        }
+      },
+      "Sex": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        }
+      },
+      "Status": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        }
+      },
+      "TypeOfDating": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
           }
         }
       },
@@ -1394,6 +1674,39 @@
             "items": {
               "$ref": "#/components/schemas/PhotoDto"
             }
+          }
+        }
+      },
+      "Worldview": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        }
+      },
+      "ZodiacSign": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        }
+      },
+      "model.Interest": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
           }
         }
       }

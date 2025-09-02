@@ -6,7 +6,7 @@ type Service struct {
 	matchStorage MatchStorage
 }
 
-func NewMatchService(matchStorage MatchStorage) *Service {
+func NewService(matchStorage MatchStorage) *Service {
 	return &Service{matchStorage}
 }
 

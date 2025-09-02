@@ -12,7 +12,7 @@ type Handler struct {
 	service *Service
 }
 
-func NewRecommendationHandler(router *http.ServeMux, service *Service) {
+func NewHandler(router *http.ServeMux, service *Service) {
 	handler := &Handler{service: service}
 	router.Handle("GET /recommendations", handler.GetRecommendations())
 }
@@ -29,7 +29,7 @@ func NewRecommendationHandler(router *http.ServeMux, service *Service) {
 // @Security     AuthorizationHeader
 // @Resource     Recommendations
 // @Route        /recommendations [get]
-func (handler *Handler) GetRecommendations() http.HandlerFunc {
+func (h *Handler) GetRecommendations() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		pageStr := r.URL.Query().Get("page")
@@ -50,7 +50,7 @@ func (handler *Handler) GetRecommendations() http.HandlerFunc {
 			http.Error(w, ErrQueryParam.Error(), http.StatusBadRequest)
 			return
 		}
-		userRecommendation, err := handler.service.GetRecommendations(userId, page, pageSize)
+		userRecommendation, err := h.service.GetRecommendations(userId, page, pageSize)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrUserNotFound):

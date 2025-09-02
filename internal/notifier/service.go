@@ -12,7 +12,7 @@ type Service struct {
 	matchProvider    MatchProvider
 }
 
-func NewNotifierService(hub *Hub, activityProvider ActivityProvider, matchProvider MatchProvider) *Service {
+func NewService(hub *Hub, activityProvider ActivityProvider, matchProvider MatchProvider) *Service {
 	return &Service{
 		hub:              hub,
 		activityProvider: activityProvider,

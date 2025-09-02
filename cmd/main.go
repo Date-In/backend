@@ -8,6 +8,7 @@ import (
 	"dating_service/internal/auth"
 	"dating_service/internal/cache"
 	"dating_service/internal/chat"
+	"dating_service/internal/dictionaries"
 	"dating_service/internal/filestorage"
 	"dating_service/internal/filter"
 	"dating_service/internal/like"
@@ -55,37 +56,39 @@ func main() {
 	mainRouter := http.NewServeMux()
 	publicRouter := http.NewServeMux()
 	protectedRouter := http.NewServeMux()
-	//cache
-	refCache, err := cache.NewReferenceCache(db)
-	if err != nil {
-		panic(err)
-	}
 	//repository
-	userRepository := user.NewUserRepository(db)
-	photoRepository := photo.NewPhotoRepository(db)
-	filterRepository := filter.NewFilterRepository(db)
-	actionsRepository := action.NewActionsRepository(db)
-	likeRepository := like.NewLikeRepository(db)
-	matchRepository := match.NewMatchRepository(db)
-	messageRepository := message.NewMessageRepository(db)
-	activityRepository := activity.NewActivityRepository(db)
+	userRepository := user.NewRepository(db)
+	photoRepository := photo.NewRepository(db)
+	filterRepository := filter.NewRepository(db)
+	actionsRepository := action.NewRepository(db)
+	likeRepository := like.NewRepository(db)
+	matchRepository := match.NewRepository(db)
+	messageRepository := message.NewRepository(db)
+	activityRepository := activity.NewRepository(db)
+	refCacheRepository := cache.NewRepository(db)
 	//ws-hub
 	notifierHub := notifier.NewHub()
 	go notifierHub.Run()
+	//cache
+	refCache, err := cache.NewReferenceCache(refCacheRepository)
+	if err != nil {
+		panic(err)
+	}
 	//service
+	dictionariesService := dictionaries.NewService(refCache)
 	photoS3Service := filestorage.NewS3FileStorage(photoS3Client, config)
-	photoService := photo.NewPhotoService(photoRepository, photoS3Service)
-	userService := user.NewUserService(userRepository)
-	authService := auth.NewAuthService(userService, refCache, tokenGenerator)
-	profileService := profile.NewProfileService(userService, photoService, refCache)
-	filterService := filter.NewFilterService(filterRepository)
-	recommendationService := recommendations.NewRecommendationService(userService, filterService)
-	actionService := action.NewActionsService(userService, actionsRepository)
-	matchService := match.NewMatchService(matchRepository)
-	likeService := like.NewLikeService(likeRepository, userService, matchService)
-	activityService := activity.NewActivityService(activityRepository)
-	messageService := message.NewMessageService(messageRepository)
-	notifierService := notifier.NewNotifierService(notifierHub, activityService, matchService)
+	photoService := photo.NewService(photoRepository, photoS3Service)
+	userService := user.NewService(userRepository)
+	authService := auth.NewService(userService, refCache, tokenGenerator)
+	profileService := profile.NewService(userService, photoService, refCache)
+	filterService := filter.NewService(filterRepository)
+	recommendationService := recommendations.NewService(userService, filterService)
+	actionService := action.NewService(userService, actionsRepository)
+	matchService := match.NewService(matchRepository)
+	likeService := like.NewService(likeRepository, userService, matchService)
+	activityService := activity.NewService(activityRepository)
+	messageService := message.NewService(messageRepository)
+	notifierService := notifier.NewService(notifierHub, activityService, matchService)
 	chatService := chat.NewService(matchService, messageService, notifierService)
 	//background tasks
 	go func() {
@@ -103,16 +106,17 @@ func main() {
 	publicRouter.HandleFunc("/swagger/", httpSwagger.Handler(
 		httpSwagger.URL("/swagger/oas.yaml"),
 	))
-	auth.NewAuthHandler(publicRouter, authService)
-	notifier.NewNotifyHandler(publicRouter, notifierService, config)
-	chat.NewChatHandlerWs(publicRouter, chatService, config)
+	dictionaries.NewHandler(publicRouter, dictionariesService)
+	auth.NewHandler(publicRouter, authService)
+	notifier.NewHandlerWs(publicRouter, notifierService, config)
+	chat.NewHandlerWs(publicRouter, chatService, config)
 	//handler-protected
-	profile.NewProfileHandler(protectedRouter, profileService, ctx)
-	filter.NewFilterHandler(protectedRouter, filterService)
-	recommendations.NewRecommendationHandler(protectedRouter, recommendationService)
-	like.NewLikeHandler(protectedRouter, likeService)
-	match.NewMatchHandler(protectedRouter, matchService)
-	chat.NewChatHandler(protectedRouter, chatService)
+	profile.NewHandler(protectedRouter, profileService, ctx)
+	filter.NewHandler(protectedRouter, filterService)
+	recommendations.NewHandler(protectedRouter, recommendationService)
+	like.NewHandler(protectedRouter, likeService)
+	match.NewHandler(protectedRouter, matchService)
+	chat.NewHandler(protectedRouter, chatService)
 	//middlewares
 	authMiddleware := middleware.NewAuthMiddleware(*config)
 	checkBlockedUserMiddleware := middleware.NewCheckBlockedUserMiddleware(userRepository)
@@ -125,6 +129,7 @@ func main() {
 		middleware.Logging,
 	)
 	//routing
+	mainRouter.Handle("/dict/", publicRouter)
 	mainRouter.Handle("/auth/", publicRouter)
 	mainRouter.Handle("/swagger/", publicRouter)
 	mainRouter.Handle("/chat/ws", publicRouter)

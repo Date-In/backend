@@ -18,7 +18,7 @@ type HandlerWs struct {
 	conf     *configs.Config
 }
 
-func NewChatHandlerWs(router *http.ServeMux, service ChatProvider, conf *configs.Config) {
+func NewHandlerWs(router *http.ServeMux, service ChatProvider, conf *configs.Config) {
 	handler := &HandlerWs{
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
@@ -56,7 +56,7 @@ type Handler struct {
 	service ChatProvider
 }
 
-func NewChatHandler(router *http.ServeMux, service ChatProvider) {
+func NewHandler(router *http.ServeMux, service ChatProvider) {
 	handler := &Handler{service: service}
 	router.Handle("GET /chat/history", handler.GetHistory())
 }
