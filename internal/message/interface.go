@@ -7,3 +7,8 @@ type MessageStorage interface {
 	GetHistory(matchID uint, limit int) ([]*model.Message, error)
 	MarkMessageIsRead(messagesID []uint) error
 }
+
+type CryptoProvider interface {
+	EncryptString(plain string) (string, error)
+	DecryptString(encrypted string) (string, error)
+}

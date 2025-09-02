@@ -20,6 +20,7 @@ import (
 	"dating_service/internal/recommendations"
 	"dating_service/internal/user"
 	"dating_service/pkg/JWT"
+	"dating_service/pkg/cryptohelper"
 	db2 "dating_service/pkg/db"
 	"dating_service/pkg/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -75,6 +76,7 @@ func main() {
 		panic(err)
 	}
 	//service
+	cryptoMessage := cryptohelper.NewService(config)
 	dictionariesService := dictionaries.NewService(refCache)
 	photoS3Service := filestorage.NewS3FileStorage(photoS3Client, config)
 	photoService := photo.NewService(photoRepository, photoS3Service)
@@ -87,7 +89,7 @@ func main() {
 	matchService := match.NewService(matchRepository)
 	likeService := like.NewService(likeRepository, userService, matchService)
 	activityService := activity.NewService(activityRepository)
-	messageService := message.NewService(messageRepository)
+	messageService := message.NewService(messageRepository, cryptoMessage)
 	notifierService := notifier.NewService(notifierHub, activityService, matchService)
 	chatService := chat.NewService(matchService, messageService, notifierService)
 	//background tasks

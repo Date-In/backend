@@ -8,6 +8,7 @@ import (
 type Config struct {
 	*BdConfig
 	*SecretToken
+	*SecretKeyCryptMessage
 	*S3
 }
 
@@ -17,6 +18,10 @@ type BdConfig struct {
 
 type SecretToken struct {
 	Token string
+}
+
+type SecretKeyCryptMessage struct {
+	Key string
 }
 
 type S3 struct {
@@ -36,6 +41,9 @@ func NewConfig() *Config {
 		},
 		SecretToken: &SecretToken{
 			Token: os.Getenv("TOKEN"),
+		},
+		SecretKeyCryptMessage: &SecretKeyCryptMessage{
+			Key: os.Getenv("KEY_MESSAGE_CRYPT"),
 		},
 		S3: &S3{
 			AccessKeyID:     os.Getenv("YANDEX_ACCESS_KEY_ID"),
