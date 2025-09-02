@@ -2,17 +2,17 @@ package activity
 
 import "time"
 
-type ActivityService struct {
+type Service struct {
 	activityStorage ActivityStorage
 }
 
-func NewActivityService(activityStorage ActivityStorage) *ActivityService {
-	return &ActivityService{activityStorage}
+func NewActivityService(activityStorage ActivityStorage) *Service {
+	return &Service{activityStorage}
 }
 
-func (service *ActivityService) UpdateLastSeen(userID uint, seenAt time.Time) error {
-	return service.activityStorage.UpdateLastSeen(userID, seenAt)
+func (s *Service) UpdateLastSeen(userID uint, seenAt time.Time) error {
+	return s.activityStorage.UpdateLastSeen(userID, seenAt)
 }
-func (service *ActivityService) GetLastSeenForUsers(userIDs []uint) (map[uint]time.Time, error) {
-	return service.activityStorage.GetLastSeenForUsers(userIDs)
+func (s *Service) GetLastSeenForUsers(userIDs []uint) (map[uint]time.Time, error) {
+	return s.activityStorage.GetLastSeenForUsers(userIDs)
 }

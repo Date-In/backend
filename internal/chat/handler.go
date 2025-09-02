@@ -12,14 +12,14 @@ import (
 	"strconv"
 )
 
-type ChatHandlerWs struct {
+type HandlerWs struct {
 	upgrader websocket.Upgrader
 	service  ChatProvider
 	conf     *configs.Config
 }
 
 func NewChatHandlerWs(router *http.ServeMux, service ChatProvider, conf *configs.Config) {
-	handler := &ChatHandlerWs{
+	handler := &HandlerWs{
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
@@ -29,7 +29,7 @@ func NewChatHandlerWs(router *http.ServeMux, service ChatProvider, conf *configs
 	router.HandleFunc("/chat/ws", handler.ServeWs())
 }
 
-func (h *ChatHandlerWs) ServeWs() http.HandlerFunc {
+func (h *HandlerWs) ServeWs() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		matchIDStr := r.URL.Query().Get("match_id")
 		matchID, err := strconv.ParseUint(matchIDStr, 10, 64)
@@ -52,16 +52,16 @@ func (h *ChatHandlerWs) ServeWs() http.HandlerFunc {
 	}
 }
 
-type ChatHandler struct {
+type Handler struct {
 	service ChatProvider
 }
 
 func NewChatHandler(router *http.ServeMux, service ChatProvider) {
-	handler := &ChatHandler{service: service}
+	handler := &Handler{service: service}
 	router.Handle("GET /chat/history", handler.GetHistory())
 }
 
-func (h *ChatHandler) GetHistory() http.HandlerFunc {
+func (h *Handler) GetHistory() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))

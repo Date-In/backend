@@ -8,12 +8,12 @@ import (
 	"net/http"
 )
 
-type FilterHandler struct {
-	service *FilterService
+type Handler struct {
+	service *Service
 }
 
-func NewFilterHandler(router *http.ServeMux, service *FilterService) {
-	handler := &FilterHandler{service: service}
+func NewFilterHandler(router *http.ServeMux, service *Service) {
+	handler := &Handler{service: service}
 	router.Handle("GET /filter", handler.GetFilter())
 	router.Handle("POST /filter/create", handler.CreateFilter())
 	router.Handle("PATCH /filter/update", handler.UpdateFilter())
@@ -29,7 +29,7 @@ func NewFilterHandler(router *http.ServeMux, service *FilterService) {
 // @Security     AuthorizationHeader
 // @Resource     Filters
 // @Route        /filter/create [post]
-func (handler *FilterHandler) CreateFilter() http.HandlerFunc {
+func (handler *Handler) CreateFilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		body, err := req.HandleBody[CreateFilterDto](r)
@@ -64,7 +64,7 @@ func (handler *FilterHandler) CreateFilter() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Filters
 // @Route        /filter/update [patch]
-func (handler *FilterHandler) UpdateFilter() http.HandlerFunc {
+func (handler *Handler) UpdateFilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		body, err := req.HandleBody[UpdateFilterDto](r)
@@ -96,7 +96,7 @@ func (handler *FilterHandler) UpdateFilter() http.HandlerFunc {
 // @Security     ApiKeyAuth
 // @Resource     Filters
 // @Route        /filter [get]
-func (handler *FilterHandler) GetFilter() http.HandlerFunc {
+func (handler *Handler) GetFilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		filter, err := handler.service.GetFilter(userId)

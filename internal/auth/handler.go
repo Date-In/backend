@@ -7,12 +7,12 @@ import (
 	"net/http"
 )
 
-type AuthHandler struct {
-	service *AuthService
+type Handler struct {
+	service *Service
 }
 
-func NewAuthHandler(router *http.ServeMux, service *AuthService) {
-	handler := &AuthHandler{service}
+func NewAuthHandler(router *http.ServeMux, service *Service) {
+	handler := &Handler{service}
 	router.HandleFunc("POST /auth/register", handler.Register())
 	router.HandleFunc("POST /auth/login", handler.Login())
 }
@@ -24,7 +24,7 @@ func NewAuthHandler(router *http.ServeMux, service *AuthService) {
 // @Success      201 {string} string "JWT токен"
 // @Resource     Authentication
 // @Route        /auth/register [post]
-func (handler *AuthHandler) Register() http.HandlerFunc {
+func (handler *Handler) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := req.HandleBody[RegisterRequestDto](r)
 		if err != nil {
@@ -61,7 +61,7 @@ func (handler *AuthHandler) Register() http.HandlerFunc {
 // @Success      200 {string} string "eyJhbGciOiJIU..."
 // @Resource     Authentication
 // @Route        /auth/login [post]
-func (handler *AuthHandler) Login() http.HandlerFunc {
+func (handler *Handler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := req.HandleBody[LoginRequestDto](r)
 		if err != nil {

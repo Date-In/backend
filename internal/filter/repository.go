@@ -7,28 +7,28 @@ import (
 	"gorm.io/gorm"
 )
 
-type FilterRepository struct {
+type Repository struct {
 	db *db.Db
 }
 
-func NewFilterRepository(db *db.Db) *FilterRepository {
-	return &FilterRepository{db}
+func NewFilterRepository(db *db.Db) *Repository {
+	return &Repository{db}
 }
 
-func (repo *FilterRepository) GetFilterUser(userId uint) (*model.FilterSearch, error) {
+func (r *Repository) GetFilterUser(userId uint) (*model.FilterSearch, error) {
 	var filter model.FilterSearch
 
-	err := repo.db.PgDb.Where("user_id = ?", userId).First(&filter).Error
+	err := r.db.PgDb.Where("user_id = ?", userId).First(&filter).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
 	return &filter, err
 }
 
-func (repo *FilterRepository) CreateFilter(filter model.FilterSearch) error {
-	return repo.db.PgDb.Create(&filter).Error
+func (r *Repository) CreateFilter(filter model.FilterSearch) error {
+	return r.db.PgDb.Create(&filter).Error
 }
 
-func (repo *FilterRepository) UpdateFilter(filter model.FilterSearch) error {
-	return repo.db.PgDb.Updates(&filter).Error
+func (r *Repository) UpdateFilter(filter model.FilterSearch) error {
+	return r.db.PgDb.Updates(&filter).Error
 }

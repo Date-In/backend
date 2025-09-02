@@ -7,18 +7,18 @@ import (
 	"time"
 )
 
-type LikeRepository struct {
+type Repository struct {
 	db *db.Db
 }
 
-func NewLikeRepository(db *db.Db) *LikeRepository {
-	return &LikeRepository{db}
+func NewLikeRepository(db *db.Db) *Repository {
+	return &Repository{db}
 }
 
-func (repo *LikeRepository) GetLikes(userId uint) ([]model.Like, error) {
+func (r *Repository) GetLikes(userId uint) ([]model.Like, error) {
 	var likes []model.Like
 
-	err := repo.db.PgDb.Model(&model.Like{}).
+	err := r.db.PgDb.Model(&model.Like{}).
 		Preload("User.Avatar", "is_avatar = ?", true).
 		Preload("User.Photos", "is_avatar = ?", false).
 		Where("target_id = ?", userId).
@@ -32,8 +32,8 @@ func (repo *LikeRepository) GetLikes(userId uint) ([]model.Like, error) {
 	return likes, nil
 }
 
-func (repo *LikeRepository) CreateLike(userId uint, targetId uint) error {
-	err := repo.db.PgDb.Create(&model.Like{
+func (r *Repository) CreateLike(userId uint, targetId uint) error {
+	err := r.db.PgDb.Create(&model.Like{
 		UserID:    userId,
 		TargetID:  targetId,
 		CreatedAt: time.Now(),
@@ -44,9 +44,9 @@ func (repo *LikeRepository) CreateLike(userId uint, targetId uint) error {
 	return nil
 }
 
-func (repo *LikeRepository) FindLikeByTargetIdAndUserID(targetID, userID uint) (*model.Like, error) {
+func (r *Repository) FindLikeByTargetIdAndUserID(targetID, userID uint) (*model.Like, error) {
 	var like model.Like
-	err := repo.db.PgDb.Model(&model.Like{}).
+	err := r.db.PgDb.Model(&model.Like{}).
 		Where("target_id = ? AND user_id = ?", targetID, userID).
 		First(&like).Error
 	if err != nil {

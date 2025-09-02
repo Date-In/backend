@@ -5,13 +5,13 @@ import (
 	"sort"
 )
 
-type RecommendationService struct {
+type Service struct {
 	userProvider   UserProvider
 	filterProvider FilterProvider
 }
 
-func NewRecommendationService(userProvider UserProvider, filterProvider FilterProvider) *RecommendationService {
-	return &RecommendationService{userProvider, filterProvider}
+func NewRecommendationService(userProvider UserProvider, filterProvider FilterProvider) *Service {
+	return &Service{userProvider, filterProvider}
 }
 
 type ScoredUser struct {
@@ -109,22 +109,22 @@ func CalculateMatchScore(currentUser, candidateUser *model.User, weights Scoring
 	return score
 }
 
-func (service *RecommendationService) GetRecommendations(currentUserID uint, page, pageSize int) ([]ScoredUser, error) {
-	currentUser, err := service.userProvider.FindUserWithoutEntity(currentUserID)
+func (s *Service) GetRecommendations(currentUserID uint, page, pageSize int) ([]ScoredUser, error) {
+	currentUser, err := s.userProvider.FindUserWithoutEntity(currentUserID)
 	if err != nil {
 		return nil, err
 	}
 	if currentUser == nil {
 		return nil, ErrUserNotFound
 	}
-	userFilter, err := service.filterProvider.GetFilter(currentUserID)
+	userFilter, err := s.filterProvider.GetFilter(currentUserID)
 	if err != nil {
 		return nil, err
 	}
 	if userFilter == nil {
 		return nil, ErrFilterNotFound
 	}
-	users, _, err := service.userProvider.FindUsersWithFilter(userFilter, page, pageSize)
+	users, _, err := s.userProvider.FindUsersWithFilter(userFilter, page, pageSize)
 	if err != nil {
 		return nil, err
 	}

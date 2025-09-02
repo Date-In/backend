@@ -16,7 +16,7 @@ const (
 
 var ErrForbidden = errors.New("user is not a participant in this match")
 
-type ChatService struct {
+type Service struct {
 	hubs            map[uint]*Hub
 	mu              sync.RWMutex
 	matchProvider   MatchProvider
@@ -24,8 +24,8 @@ type ChatService struct {
 	notify          Notify
 }
 
-func NewService(matchProvider MatchProvider, messageProvider MessageProvider, notify Notify) *ChatService {
-	return &ChatService{
+func NewService(matchProvider MatchProvider, messageProvider MessageProvider, notify Notify) *Service {
+	return &Service{
 		hubs:            make(map[uint]*Hub),
 		matchProvider:   matchProvider,
 		messageProvider: messageProvider,
@@ -33,7 +33,7 @@ func NewService(matchProvider MatchProvider, messageProvider MessageProvider, no
 	}
 }
 
-func (s *ChatService) HandleNewConnection(userID, matchID uint, conn *websocket.Conn) {
+func (s *Service) HandleNewConnection(userID, matchID uint, conn *websocket.Conn) {
 	isParticipant, err := s.matchProvider.IsUserInMatch(userID, matchID)
 	if err != nil {
 		log.Printf("Service Error: failed to check match participation: %v", err)
@@ -69,7 +69,7 @@ func (s *ChatService) HandleNewConnection(userID, matchID uint, conn *websocket.
 	log.Printf("Client %d successfully connected to hub %d", userID, matchID)
 }
 
-func (s *ChatService) GetMessageHistory(userID, matchID uint, limit int) ([]*model.Message, error) {
+func (s *Service) GetMessageHistory(userID, matchID uint, limit int) ([]*model.Message, error) {
 	isParticipant, err := s.matchProvider.IsUserInMatch(userID, matchID)
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func (s *ChatService) GetMessageHistory(userID, matchID uint, limit int) ([]*mod
 	return s.messageProvider.GetHistory(matchID, limit)
 }
 
-func (s *ChatService) ProcessEvent(hub *Hub, eventData *EventWithSender) error {
+func (s *Service) ProcessEvent(hub *Hub, eventData *EventWithSender) error {
 	event := eventData.Event
 	sender := eventData.Sender
 	switch event.EventType {
@@ -101,7 +101,7 @@ func (s *ChatService) ProcessEvent(hub *Hub, eventData *EventWithSender) error {
 	return nil
 }
 
-func (s *ChatService) processMessage(event *EventMessage, sender *Client, hub *Hub) error {
+func (s *Service) processMessage(event *EventMessage, sender *Client, hub *Hub) error {
 	var payload struct {
 		MessageText string `json:"message_text"`
 	}
@@ -139,7 +139,7 @@ func (s *ChatService) processMessage(event *EventMessage, sender *Client, hub *H
 	return nil
 }
 
-func (s *ChatService) MarkMessageIsRead(event *EventMessage, sender *Client, hub *Hub) error {
+func (s *Service) MarkMessageIsRead(event *EventMessage, sender *Client, hub *Hub) error {
 	var payload struct {
 		MessagesID []uint `json:"messages_id"`
 	}
@@ -165,7 +165,7 @@ func (s *ChatService) MarkMessageIsRead(event *EventMessage, sender *Client, hub
 	return nil
 }
 
-func (s *ChatService) notifyNewMessage(event *EventMessage, sender *Client, hub *Hub) {
+func (s *Service) notifyNewMessage(event *EventMessage, sender *Client, hub *Hub) {
 	secondUserOnline := false
 	for client, _ := range hub.clients {
 		if client.ID == sender.ID {
@@ -195,7 +195,7 @@ func (s *ChatService) notifyNewMessage(event *EventMessage, sender *Client, hub 
 	}
 }
 
-func (s *ChatService) notifyMessageIsRead(event *EventMessage, sender *Client, hub *Hub) {
+func (s *Service) notifyMessageIsRead(event *EventMessage, sender *Client, hub *Hub) {
 	users, err := s.matchProvider.GetUsers(hub.ID)
 	if err != nil {
 		log.Printf("Service Error: failed to get match users: %v", err)

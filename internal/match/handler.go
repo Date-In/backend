@@ -6,12 +6,12 @@ import (
 	"net/http"
 )
 
-type MatchHandler struct {
-	service *MatchService
+type Handler struct {
+	service *Service
 }
 
-func NewMatchHandler(router *http.ServeMux, service *MatchService) {
-	handler := &MatchHandler{service}
+func NewMatchHandler(router *http.ServeMux, service *Service) {
+	handler := &Handler{service}
 	router.HandleFunc("GET /matches/all", handler.GetAll())
 }
 
@@ -24,7 +24,7 @@ func NewMatchHandler(router *http.ServeMux, service *MatchService) {
 // @Security     AuthorizationHeader
 // @Resource     Matches
 // @Route        /matches/all [get]
-func (handler *MatchHandler) GetAll() http.HandlerFunc {
+func (handler *Handler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		matches, err := handler.service.GetUserMatches(userId)

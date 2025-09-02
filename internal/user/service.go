@@ -5,20 +5,20 @@ import (
 	"dating_service/pkg/utilits"
 )
 
-type UserService struct {
+type Service struct {
 	userStorage UserStorage
 }
 
-func NewUserService(userStorage UserStorage) *UserService {
-	return &UserService{userStorage}
+func NewUserService(userStorage UserStorage) *Service {
+	return &Service{userStorage}
 }
 
-func (service *UserService) FindUserByPhone(phone string) (*model.User, error) {
+func (s *Service) FindUserByPhone(phone string) (*model.User, error) {
 	normPhone, err := utilits.FormatPhoneNumber(phone)
 	if err != nil {
 		return nil, err
 	}
-	user, err := service.userStorage.FindByPhone(normPhone)
+	user, err := s.userStorage.FindByPhone(normPhone)
 	if err != nil {
 		return nil, err
 	}
@@ -26,77 +26,77 @@ func (service *UserService) FindUserByPhone(phone string) (*model.User, error) {
 	return user, nil
 }
 
-func (service *UserService) Create(user *model.User) error {
-	err := service.userStorage.Create(user)
+func (s *Service) Create(user *model.User) error {
+	err := s.userStorage.Create(user)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (service *UserService) FindById(id uint) (*model.User, error) {
-	user, err := service.userStorage.FindById(id)
+func (s *Service) FindById(id uint) (*model.User, error) {
+	user, err := s.userStorage.FindById(id)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (service *UserService) Update(id uint, user *model.User) error {
-	err := service.userStorage.Update(id, user)
+func (s *Service) Update(id uint, user *model.User) error {
+	err := s.userStorage.Update(id, user)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (service *UserService) UpdateInterests(userID uint, interests []*model.Interest) ([]*model.Interest, error) {
-	err := service.userStorage.ReplaceInterests(userID, interests)
+func (s *Service) UpdateInterests(userID uint, interests []*model.Interest) ([]*model.Interest, error) {
+	err := s.userStorage.ReplaceInterests(userID, interests)
 	if err != nil {
 		return nil, err
 	}
-	user, err := service.userStorage.FindById(userID)
+	user, err := s.userStorage.FindById(userID)
 	if err != nil {
 		return nil, err
 	}
 	return user.Interests, nil
 }
 
-func (service *UserService) FindUserWithoutEntity(userID uint) (*model.User, error) {
-	user, err := service.userStorage.FindUserWithoutEntity(userID)
+func (s *Service) FindUserWithoutEntity(userID uint) (*model.User, error) {
+	user, err := s.userStorage.FindUserWithoutEntity(userID)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (service *UserService) FindUsersWithFilter(filter *model.FilterSearch, page, pageSize int) ([]*model.User, int64, error) {
+func (s *Service) FindUsersWithFilter(filter *model.FilterSearch, page, pageSize int) ([]*model.User, int64, error) {
 	if page <= 0 {
 		page = 1
 	}
 	if pageSize <= 0 {
 		pageSize = 20
 	}
-	users, count, err := service.userStorage.FindUsersWithFilter(filter.MinAge, filter.MaxAge, filter.SexID, filter.Location, page, pageSize)
+	users, count, err := s.userStorage.FindUsersWithFilter(filter.MinAge, filter.MaxAge, filter.SexID, filter.Location, page, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
 	return users, count, nil
 }
 
-func (service *UserService) ReactivateUser(userID uint) error {
-	err := service.userStorage.ReactivateUser(userID)
+func (s *Service) ReactivateUser(userID uint) error {
+	err := s.userStorage.ReactivateUser(userID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (service *UserService) ChangeStatus(ids []uint) error {
+func (s *Service) ChangeStatus(ids []uint) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	err := service.userStorage.ChangeStatusUsers(ids)
+	err := s.userStorage.ChangeStatusUsers(ids)
 	if err != nil {
 		return err
 	}

@@ -7,18 +7,18 @@ import (
 	"net/http"
 )
 
-type NotifyHandlerWs struct {
+type HandlerWs struct {
 	upgrader        websocket.Upgrader
-	notifierService *NotifierService
+	notifierService *Service
 	conf            *configs.Config
 }
 
 func NewNotifyHandler(
 	router *http.ServeMux,
-	service *NotifierService,
+	service *Service,
 	conf *configs.Config,
 ) {
-	handler := &NotifyHandlerWs{
+	handler := &HandlerWs{
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
@@ -29,7 +29,7 @@ func NewNotifyHandler(
 	router.HandleFunc("/notifier/ws", handler.ServeHTTP())
 }
 
-func (h *NotifyHandlerWs) ServeHTTP() http.HandlerFunc {
+func (h *HandlerWs) ServeHTTP() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenStr := r.URL.Query().Get("token")
 		userID, err := JWT.NewJWT(h.conf.SecretToken.Token).ParseToken(tokenStr)

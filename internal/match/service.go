@@ -2,15 +2,15 @@ package match
 
 import "dating_service/internal/model"
 
-type MatchService struct {
+type Service struct {
 	matchStorage MatchStorage
 }
 
-func NewMatchService(matchStorage MatchStorage) *MatchService {
-	return &MatchService{matchStorage}
+func NewMatchService(matchStorage MatchStorage) *Service {
+	return &Service{matchStorage}
 }
 
-func (s *MatchService) GetUserMatches(currentUserID uint) ([]model.Match, error) {
+func (s *Service) GetUserMatches(currentUserID uint) ([]model.Match, error) {
 	matches, err := s.matchStorage.GetAllWithDetails(currentUserID)
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func (s *MatchService) GetUserMatches(currentUserID uint) ([]model.Match, error)
 	return matches, nil
 }
 
-func (service *MatchService) Create(userID1, userID2 uint) error {
+func (s *Service) Create(userID1, userID2 uint) error {
 	var maxId uint
 	var minId uint
 	if userID1 > userID2 {
@@ -28,29 +28,29 @@ func (service *MatchService) Create(userID1, userID2 uint) error {
 		maxId = userID2
 		minId = userID1
 	}
-	err := service.matchStorage.Create(maxId, minId)
+	err := s.matchStorage.Create(maxId, minId)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (service *MatchService) IsUserInMatch(userID uint, matchID uint) (bool, error) {
-	exists, err := service.matchStorage.IsUserInMatch(userID, matchID)
+func (s *Service) IsUserInMatch(userID uint, matchID uint) (bool, error) {
+	exists, err := s.matchStorage.IsUserInMatch(userID, matchID)
 	if err != nil {
 		return false, err
 	}
 	return exists, nil
 }
 
-func (service *MatchService) GetMatchUserIDs(userID uint) ([]uint, error) {
-	matchIds, err := service.matchStorage.GetMatchUserIDs(userID)
+func (s *Service) GetMatchUserIDs(userID uint) ([]uint, error) {
+	matchIds, err := s.matchStorage.GetMatchUserIDs(userID)
 	if err != nil {
 		return nil, err
 	}
 	return matchIds, nil
 }
 
-func (service *MatchService) GetUsers(matchID uint) ([]model.User, error) {
-	return service.matchStorage.GetUsers(matchID)
+func (s *Service) GetUsers(matchID uint) ([]model.User, error) {
+	return s.matchStorage.GetUsers(matchID)
 }

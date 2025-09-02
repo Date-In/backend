@@ -7,15 +7,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type MessageRepository struct {
+type Repository struct {
 	db *db.Db
 }
 
-func NewMessageRepository(db *db.Db) *MessageRepository {
-	return &MessageRepository{db}
+func NewMessageRepository(db *db.Db) *Repository {
+	return &Repository{db}
 }
 
-func (r *MessageRepository) Save(message *model.Message) (*model.Message, error) {
+func (r *Repository) Save(message *model.Message) (*model.Message, error) {
 	result := r.db.PgDb.Create(message)
 	if result.Error != nil {
 		return nil, result.Error
@@ -23,7 +23,7 @@ func (r *MessageRepository) Save(message *model.Message) (*model.Message, error)
 	return message, nil
 }
 
-func (r *MessageRepository) GetHistory(matchID uint, limit int) ([]*model.Message, error) {
+func (r *Repository) GetHistory(matchID uint, limit int) ([]*model.Message, error) {
 	var messages []*model.Message
 
 	err := r.db.PgDb.Where("match_id = ?", matchID).
@@ -40,7 +40,7 @@ func (r *MessageRepository) GetHistory(matchID uint, limit int) ([]*model.Messag
 	return messages, nil
 }
 
-func (r *MessageRepository) MarkMessageIsRead(messagesID []uint) error {
+func (r *Repository) MarkMessageIsRead(messagesID []uint) error {
 	err := r.db.PgDb.Model(&model.Message{}).
 		Where("id IN ?", messagesID).
 		Update("is_read", true).Error

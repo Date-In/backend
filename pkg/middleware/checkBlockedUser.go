@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func NewCheckBlockedUserMiddleware(userRepository *user.UserRepository) Middleware {
+func NewCheckBlockedUserMiddleware(userRepository *user.Repository) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			userId := utilits.GetIdContext(w, r)

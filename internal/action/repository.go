@@ -6,17 +6,17 @@ import (
 	"time"
 )
 
-type ActionsRepository struct {
+type Repository struct {
 	db *db.Db
 }
 
-func NewActionsRepository(db *db.Db) *ActionsRepository {
-	return &ActionsRepository{db}
+func NewActionsRepository(db *db.Db) *Repository {
+	return &Repository{db}
 }
 
-func (repo *ActionsRepository) GetNonActiveUserIds(olderThan time.Time) ([]uint, error) {
+func (r *Repository) GetNonActiveUserIds(olderThan time.Time) ([]uint, error) {
 	var userIds []uint
-	err := repo.db.PgDb.Model(&model.Actions{}).
+	err := r.db.PgDb.Model(&model.Actions{}).
 		Where("action < ? ", olderThan).
 		Pluck("user_id", &userIds).Error
 	if err != nil {

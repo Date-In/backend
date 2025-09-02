@@ -8,12 +8,12 @@ import (
 	"strconv"
 )
 
-type LikeHandler struct {
-	service *LikeService
+type Handler struct {
+	service *Service
 }
 
-func NewLikeHandler(router *http.ServeMux, service *LikeService) {
-	handler := &LikeHandler{service}
+func NewLikeHandler(router *http.ServeMux, service *Service) {
+	handler := &Handler{service}
 	router.HandleFunc("POST /like/{target_id}", handler.CreateLike())
 	router.HandleFunc("GET /like/all", handler.GetLike())
 }
@@ -29,7 +29,7 @@ func NewLikeHandler(router *http.ServeMux, service *LikeService) {
 // @Security     AuthorizationHeader
 // @Resource     Likes
 // @Route        /like/{target_id} [post]
-func (handler *LikeHandler) CreateLike() http.HandlerFunc {
+func (handler *Handler) CreateLike() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		targetIdStr := r.PathValue("target_id")
@@ -60,7 +60,7 @@ func (handler *LikeHandler) CreateLike() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Likes
 // @Route        /like/all [get]
-func (handler *LikeHandler) GetLike() http.HandlerFunc {
+func (handler *Handler) GetLike() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		likes, err := handler.service.GetLikes(userId)

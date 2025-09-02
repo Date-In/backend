@@ -7,21 +7,21 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepository struct {
+type Repository struct {
 	db *db.Db
 }
 
-func NewUserRepository(db *db.Db) *UserRepository {
-	return &UserRepository{db}
+func NewUserRepository(db *db.Db) *Repository {
+	return &Repository{db}
 }
 
-func (repo *UserRepository) Create(user *model.User) error {
-	return repo.db.PgDb.Create(user).Error
+func (r *Repository) Create(user *model.User) error {
+	return r.db.PgDb.Create(user).Error
 }
 
-func (repo *UserRepository) FindByPhone(phone string) (*model.User, error) {
+func (r *Repository) FindByPhone(phone string) (*model.User, error) {
 	var user model.User
-	err := repo.db.PgDb.Where("phone = ?", phone).First(&user).Error
+	err := r.db.PgDb.Where("phone = ?", phone).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -31,9 +31,9 @@ func (repo *UserRepository) FindByPhone(phone string) (*model.User, error) {
 	return &user, nil
 }
 
-func (repo *UserRepository) FindById(id uint) (*model.User, error) {
+func (r *Repository) FindById(id uint) (*model.User, error) {
 	var user model.User
-	err := repo.db.PgDb.
+	err := r.db.PgDb.
 		Preload("Interests").
 		Preload("Photos", "is_avatar = ?", false).
 		Preload("Avatar", "is_avatar = ?", true).
@@ -46,8 +46,8 @@ func (repo *UserRepository) FindById(id uint) (*model.User, error) {
 	return &user, err
 }
 
-func (repo *UserRepository) Update(id uint, updateData *model.User) error {
-	result := repo.db.PgDb.
+func (r *Repository) Update(id uint, updateData *model.User) error {
+	result := r.db.PgDb.
 		Model(&model.User{}).
 		Where("id = ?", id).
 		Updates(updateData)
@@ -60,16 +60,16 @@ func (repo *UserRepository) Update(id uint, updateData *model.User) error {
 	return nil
 }
 
-func (r *UserRepository) ReplaceInterests(userID uint, interests []*model.Interest) error {
+func (r *Repository) ReplaceInterests(userID uint, interests []*model.Interest) error {
 	var user model.User
 	user.ID = userID
 	err := r.db.PgDb.Model(&user).Association("Interests").Replace(interests)
 	return err
 }
 
-func (repo *UserRepository) FindUsersWithFilter(minAge, maxAge, sexID uint, location string, page, pageSize int) ([]*model.User, int64, error) {
+func (r *Repository) FindUsersWithFilter(minAge, maxAge, sexID uint, location string, page, pageSize int) ([]*model.User, int64, error) {
 	var users []*model.User
-	query := repo.db.PgDb.Model(&model.User{})
+	query := r.db.PgDb.Model(&model.User{})
 	var totalCount int64
 	offset := (page - 1) * pageSize
 	query = query.Where("age BETWEEN ? AND ?", minAge, maxAge).
@@ -93,9 +93,9 @@ func (repo *UserRepository) FindUsersWithFilter(minAge, maxAge, sexID uint, loca
 	return users, totalCount, nil
 }
 
-func (repo *UserRepository) FindUserWithoutEntity(userId uint) (*model.User, error) {
+func (r *Repository) FindUserWithoutEntity(userId uint) (*model.User, error) {
 	var user *model.User
-	err := repo.db.PgDb.First(&user, "id = ?", userId).Error
+	err := r.db.PgDb.First(&user, "id = ?", userId).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -105,19 +105,19 @@ func (repo *UserRepository) FindUserWithoutEntity(userId uint) (*model.User, err
 	return user, nil
 }
 
-func (repo *UserRepository) ChangeStatusUsers(ids []uint) error {
-	return repo.db.PgDb.Model(&model.User{}).Where("id IN (?) AND status_id != 3", ids).Update("status_id", 2).Error
+func (r *Repository) ChangeStatusUsers(ids []uint) error {
+	return r.db.PgDb.Model(&model.User{}).Where("id IN (?) AND status_id != 3", ids).Update("status_id", 2).Error
 }
-func (repo *UserRepository) ReactivateUser(userID uint) error {
-	result := repo.db.PgDb.Model(&model.User{}).
+func (r *Repository) ReactivateUser(userID uint) error {
+	result := r.db.PgDb.Model(&model.User{}).
 		Where("id = ? AND status_id = ? AND status_id != 3", userID, 2).
 		Update("status_id", 1)
 	return result.Error
 }
 
-func (repo *UserRepository) GetStatusUser(id uint) (uint, error) {
+func (r *Repository) GetStatusUser(id uint) (uint, error) {
 	var statusID uint
-	err := repo.db.PgDb.Model(&model.User{}).
+	err := r.db.PgDb.Model(&model.User{}).
 		Select("status_id").
 		Where("id = ?", id).
 		Scan(&statusID).Error

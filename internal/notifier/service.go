@@ -6,27 +6,27 @@ import (
 	"time"
 )
 
-type NotifierService struct {
+type Service struct {
 	hub              *Hub
 	activityProvider ActivityProvider
 	matchProvider    MatchProvider
 }
 
-func NewNotifierService(hub *Hub, activityProvider ActivityProvider, matchProvider MatchProvider) *NotifierService {
-	return &NotifierService{
+func NewNotifierService(hub *Hub, activityProvider ActivityProvider, matchProvider MatchProvider) *Service {
+	return &Service{
 		hub:              hub,
 		activityProvider: activityProvider,
 		matchProvider:    matchProvider,
 	}
 }
 
-func (s *NotifierService) HandleUserConnect(client *Client) {
+func (s *Service) HandleUserConnect(client *Client) {
 	s.hub.RegisterChannel() <- client
 	s.broadcastStatus(client.ID, true)
 	s.sendInitialStatuses(client.ID)
 }
 
-func (s *NotifierService) HandleUserDisconnect(client *Client) {
+func (s *Service) HandleUserDisconnect(client *Client) {
 	if err := s.activityProvider.UpdateLastSeen(client.ID, time.Now().UTC()); err != nil {
 		log.Printf("Error updating last seen for user %d: %v", client.ID, err)
 	}
@@ -34,14 +34,14 @@ func (s *NotifierService) HandleUserDisconnect(client *Client) {
 	s.hub.UnregisterChannel() <- client
 }
 
-func (s *NotifierService) NotifyUser(userID uint, eventType string, payload interface{}) {
+func (s *Service) NotifyUser(userID uint, eventType string, payload interface{}) {
 	message := s.buildMessage(eventType, payload)
 	if message != nil {
 		s.hub.SendTo(userID, message)
 	}
 }
 
-func (s *NotifierService) broadcastStatus(userID uint, isOnline bool) {
+func (s *Service) broadcastStatus(userID uint, isOnline bool) {
 	matchIDs, err := s.matchProvider.GetMatchUserIDs(userID)
 	if err != nil {
 		return
@@ -65,7 +65,7 @@ func (s *NotifierService) broadcastStatus(userID uint, isOnline bool) {
 	}
 }
 
-func (s *NotifierService) sendInitialStatuses(userID uint) {
+func (s *Service) sendInitialStatuses(userID uint) {
 	matchIDs, err := s.matchProvider.GetMatchUserIDs(userID)
 	if err != nil {
 		return
@@ -98,7 +98,7 @@ func (s *NotifierService) sendInitialStatuses(userID uint) {
 	}
 }
 
-func (s *NotifierService) buildMessage(eventType string, payload interface{}) []byte {
+func (s *Service) buildMessage(eventType string, payload interface{}) []byte {
 	msg := Notify{
 		EventType: eventType,
 		Payload:   payload,

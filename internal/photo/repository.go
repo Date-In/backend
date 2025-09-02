@@ -8,21 +8,21 @@ import (
 	"gorm.io/gorm"
 )
 
-type PhotoRepository struct {
+type Repository struct {
 	db *db.Db
 }
 
-func NewPhotoRepository(db *db.Db) *PhotoRepository {
-	return &PhotoRepository{db}
+func NewPhotoRepository(db *db.Db) *Repository {
+	return &Repository{db}
 }
 
-func (repo *PhotoRepository) Save(photo *model.Photo) error {
-	return repo.db.PgDb.Save(photo).Error
+func (r *Repository) Save(photo *model.Photo) error {
+	return r.db.PgDb.Save(photo).Error
 }
 
-func (repo *PhotoRepository) GetById(uuid string) (*model.Photo, error) {
+func (r *Repository) GetById(uuid string) (*model.Photo, error) {
 	var photo *model.Photo
-	err := repo.db.PgDb.Where("id = ?", uuid).First(&photo).Error
+	err := r.db.PgDb.Where("id = ?", uuid).First(&photo).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -32,27 +32,27 @@ func (repo *PhotoRepository) GetById(uuid string) (*model.Photo, error) {
 	return photo, err
 }
 
-func (repo *PhotoRepository) CountPhoto(id uint) (int, error) {
+func (r *Repository) CountPhoto(id uint) (int, error) {
 	var count int64
-	err := repo.db.PgDb.Model(&model.Photo{}).Where("user_id = ?", id).Count(&count).Error
+	err := r.db.PgDb.Model(&model.Photo{}).Where("user_id = ?", id).Count(&count).Error
 	if err != nil {
 		return 0, err
 	}
 	return int(count), nil
 }
 
-func (repo *PhotoRepository) DeleteById(uuid string, userId uint) (int64, error) {
-	result := repo.db.PgDb.Where("id = ? and user_id = ?", uuid, userId).Delete(&model.Photo{})
+func (r *Repository) DeleteById(uuid string, userId uint) (int64, error) {
+	result := r.db.PgDb.Where("id = ? and user_id = ?", uuid, userId).Delete(&model.Photo{})
 	if result.Error != nil {
 		return 0, result.Error
 	}
 	return result.RowsAffected, nil
 }
 
-func (repo *PhotoRepository) FindAllIDs(userId uint) ([]string, error) {
+func (r *Repository) FindAllIDs(userId uint) ([]string, error) {
 	var ids []string
 
-	err := repo.db.PgDb.Model(&model.Photo{}).
+	err := r.db.PgDb.Model(&model.Photo{}).
 		Where("user_id = ?", userId).
 		Order("uploaded_at DESC").
 		Pluck("id", &ids).Error
@@ -63,10 +63,10 @@ func (repo *PhotoRepository) FindAllIDs(userId uint) ([]string, error) {
 	return ids, nil
 }
 
-func (repo *PhotoRepository) FindAvatar(userId uint) (*model.Photo, error) {
+func (r *Repository) FindAvatar(userId uint) (*model.Photo, error) {
 	var photo *model.Photo
 
-	err := repo.db.PgDb.Model(&model.Photo{}).
+	err := r.db.PgDb.Model(&model.Photo{}).
 		Where("user_id = ? AND is_avatar = ?", userId, true).
 		First(&photo).Error
 
@@ -80,10 +80,10 @@ func (repo *PhotoRepository) FindAvatar(userId uint) (*model.Photo, error) {
 	return photo, nil
 }
 
-func (repo *PhotoRepository) FindUserPhotoWithoutAvatar(userId uint) ([]string, error) {
+func (r *Repository) FindUserPhotoWithoutAvatar(userId uint) ([]string, error) {
 	var photoIds []string
 
-	err := repo.db.PgDb.Model(&model.Photo{}).
+	err := r.db.PgDb.Model(&model.Photo{}).
 		Select("id").
 		Where("user_id = ? and is_avatar = ?", userId, false).
 		Find(&photoIds).Error
@@ -96,8 +96,8 @@ func (repo *PhotoRepository) FindUserPhotoWithoutAvatar(userId uint) ([]string, 
 	return photoIds, nil
 }
 
-func (repo *PhotoRepository) ChangeAvatarUser(userId uint, photoId string) (string, error) {
-	tx := repo.db.PgDb.Begin()
+func (r *Repository) ChangeAvatarUser(userId uint, photoId string) (string, error) {
+	tx := r.db.PgDb.Begin()
 	var newAvatarID string
 
 	defer func() {

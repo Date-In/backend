@@ -7,15 +7,15 @@ import (
 	"time"
 )
 
-type ActivityRepository struct {
+type Repository struct {
 	db *db.Db
 }
 
-func NewActivityRepository(db *db.Db) *ActivityRepository {
-	return &ActivityRepository{db}
+func NewActivityRepository(db *db.Db) *Repository {
+	return &Repository{db}
 }
 
-func (r *ActivityRepository) UpdateLastSeen(userID uint, seenAt time.Time) error {
+func (r *Repository) UpdateLastSeen(userID uint, seenAt time.Time) error {
 	actionRecord := model.Actions{
 		UserID: userID,
 		Action: seenAt,
@@ -26,7 +26,7 @@ func (r *ActivityRepository) UpdateLastSeen(userID uint, seenAt time.Time) error
 	}).Create(&actionRecord).Error
 }
 
-func (r *ActivityRepository) GetLastSeenForUsers(userIDs []uint) (map[uint]time.Time, error) {
+func (r *Repository) GetLastSeenForUsers(userIDs []uint) (map[uint]time.Time, error) {
 	var results []model.Actions
 	err := r.db.PgDb.Select("user_id", "action").Where("user_id IN ?", userIDs).Find(&results).Error
 	if err != nil {

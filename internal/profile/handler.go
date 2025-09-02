@@ -12,13 +12,13 @@ import (
 	"strconv"
 )
 
-type ProfileHandler struct {
-	service *ProfileService
+type Handler struct {
+	service *Service
 	ctx     context.Context
 }
 
-func NewProfileHandler(router *http.ServeMux, service *ProfileService, ctx context.Context) {
-	handler := &ProfileHandler{service: service, ctx: ctx}
+func NewProfileHandler(router *http.ServeMux, service *Service, ctx context.Context) {
+	handler := &Handler{service: service, ctx: ctx}
 	router.Handle("GET /profile", handler.GetInfo())
 	router.Handle("GET /profile/{userId}", handler.GetProfileUser())
 	router.Handle("PATCH /profile", handler.UpdateProfile())
@@ -38,7 +38,7 @@ func NewProfileHandler(router *http.ServeMux, service *ProfileService, ctx conte
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile [get]
-func (handler *ProfileHandler) GetInfo() http.HandlerFunc {
+func (handler *Handler) GetInfo() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		user, err := handler.service.GetInfo(userID)
@@ -65,7 +65,7 @@ func (handler *ProfileHandler) GetInfo() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile/{userId} [get]
-func (handler *ProfileHandler) GetProfileUser() http.HandlerFunc {
+func (handler *Handler) GetProfileUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userIdStr := r.PathValue("userId")
 		userId, err := strconv.ParseUint(userIdStr, 10, 64)
@@ -91,7 +91,7 @@ func (handler *ProfileHandler) GetProfileUser() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile [patch]
-func (handler *ProfileHandler) UpdateProfile() http.HandlerFunc {
+func (handler *Handler) UpdateProfile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		body, err := req.HandleBody[UpdateInfoRequestDto](r)
@@ -148,7 +148,7 @@ func (handler *ProfileHandler) UpdateProfile() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile/interests [put]
-func (handler *ProfileHandler) UpdateInterests() http.HandlerFunc {
+func (handler *Handler) UpdateInterests() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		body, err := req.HandleBody[UpdateInterestRequestDto](r)
@@ -182,7 +182,7 @@ func (handler *ProfileHandler) UpdateInterests() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile/photos [post]
-func (handler *ProfileHandler) AddPhoto() http.HandlerFunc {
+func (handler *Handler) AddPhoto() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		if err := r.ParseMultipartForm(10 << 20); err != nil {
@@ -230,7 +230,7 @@ func (handler *ProfileHandler) AddPhoto() http.HandlerFunc {
 // @Security AuthorizationHeader
 // @Resource Profile
 // @Route /profile/photo/{photoId} [delete]
-func (handler *ProfileHandler) DeletePhoto() http.HandlerFunc {
+func (handler *Handler) DeletePhoto() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		photoID := r.PathValue("photoId")
 		userID := utilits.GetIdContext(w, r)
@@ -258,7 +258,7 @@ func (handler *ProfileHandler) DeletePhoto() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile/photo/change-avatar/{photoId} [patch]
-func (handler *ProfileHandler) UpdateAvatar() http.HandlerFunc {
+func (handler *Handler) UpdateAvatar() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		photoID := r.PathValue("photoId")
@@ -286,7 +286,7 @@ func (handler *ProfileHandler) UpdateAvatar() http.HandlerFunc {
 // @Security     AuthorizationHeader
 // @Resource     Profile
 // @Route        /profile/avatar [get]
-func (handler *ProfileHandler) getAvatar() http.HandlerFunc {
+func (handler *Handler) getAvatar() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := utilits.GetIdContext(w, r)
 		avatarId, err := handler.service.GetAvatar(userID)

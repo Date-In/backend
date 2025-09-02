@@ -8,12 +8,12 @@ import (
 	"strconv"
 )
 
-type RecommendationHandler struct {
-	service *RecommendationService
+type Handler struct {
+	service *Service
 }
 
-func NewRecommendationHandler(router *http.ServeMux, service *RecommendationService) {
-	handler := &RecommendationHandler{service: service}
+func NewRecommendationHandler(router *http.ServeMux, service *Service) {
+	handler := &Handler{service: service}
 	router.Handle("GET /recommendations", handler.GetRecommendations())
 }
 
@@ -29,7 +29,7 @@ func NewRecommendationHandler(router *http.ServeMux, service *RecommendationServ
 // @Security     AuthorizationHeader
 // @Resource     Recommendations
 // @Route        /recommendations [get]
-func (handler *RecommendationHandler) GetRecommendations() http.HandlerFunc {
+func (handler *Handler) GetRecommendations() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := utilits.GetIdContext(w, r)
 		pageStr := r.URL.Query().Get("page")

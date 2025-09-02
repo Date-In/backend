@@ -7,29 +7,29 @@ import (
 	"gorm.io/gorm"
 )
 
-type ProfileService struct {
+type Service struct {
 	userProvider  UserProvider
 	photoProvider PhotoProvider
 	cache         CacheProvider
 }
 
-func NewProfileService(userProvider UserProvider, photoProvider PhotoProvider, cache CacheProvider) *ProfileService {
-	return &ProfileService{userProvider, photoProvider, cache}
+func NewProfileService(userProvider UserProvider, photoProvider PhotoProvider, cache CacheProvider) *Service {
+	return &Service{userProvider, photoProvider, cache}
 }
 
-func (service *ProfileService) GetInfo(id uint) (*model.User, error) {
-	currentUser, err := service.userProvider.FindById(id)
+func (s *Service) GetInfo(id uint) (*model.User, error) {
+	currentUser, err := s.userProvider.FindById(id)
 	if err != nil {
 		return nil, err
 	}
 	if currentUser == nil {
 		return nil, ErrUserNotFound
 	}
-	preloadCache(currentUser, service.cache)
+	preloadCache(currentUser, s.cache)
 	return currentUser, nil
 }
 
-func (service *ProfileService) Update(
+func (s *Service) Update(
 	id uint,
 	name *string,
 	age *uint,
@@ -45,14 +45,14 @@ func (service *ProfileService) Update(
 	attitudeToAlcoholID *uint,
 	attitudeToSmokingID *uint,
 ) (*model.User, error) {
-	updateUser, err := service.userProvider.FindById(id)
+	updateUser, err := s.userProvider.FindById(id)
 	if err != nil {
 		return nil, err
 	}
 	if updateUser == nil {
 		return nil, ErrUserNotFound
 	}
-	preloadCache(updateUser, service.cache)
+	preloadCache(updateUser, s.cache)
 	if name != nil {
 		updateUser.Name = *name
 	}
@@ -60,7 +60,7 @@ func (service *ProfileService) Update(
 		updateUser.Age = *age
 	}
 	if sexID != nil {
-		if !service.cache.IsValidSexID(*sexID) {
+		if !s.cache.IsValidSexID(*sexID) {
 			return nil, ErrInvalidSexID
 		}
 		updateUser.SexID = *sexID
@@ -78,68 +78,68 @@ func (service *ProfileService) Update(
 		updateUser.Height = height
 	}
 	if zodiacSignID != nil {
-		if !service.cache.IsValidZodiacSignID(*zodiacSignID) {
+		if !s.cache.IsValidZodiacSignID(*zodiacSignID) {
 			return nil, ErrInvalidZodiacID
 		}
 		updateUser.ZodiacSignID = zodiacSignID
 	}
 	if worldviewID != nil {
-		if !service.cache.IsValidWorldviewID(*worldviewID) {
+		if !s.cache.IsValidWorldviewID(*worldviewID) {
 			return nil, ErrInvalidWordViewID
 		}
 		updateUser.WorldviewID = worldviewID
 	}
 	if typeOfDatingID != nil {
-		if !service.cache.IsValidTypeOfDatingID(*typeOfDatingID) {
+		if !s.cache.IsValidTypeOfDatingID(*typeOfDatingID) {
 			return nil, ErrInvalidTypeOfDatingId
 		}
 		updateUser.TypeOfDatingID = typeOfDatingID
 	}
 	if educationID != nil {
-		if !service.cache.IsValidEducationID(*educationID) {
+		if !s.cache.IsValidEducationID(*educationID) {
 			return nil, ErrInvalidEducationId
 		}
 		updateUser.EducationID = educationID
 	}
 	if attitudeToAlcoholID != nil {
-		if !service.cache.IsValidAttitudeToAlcoholID(*attitudeToAlcoholID) {
+		if !s.cache.IsValidAttitudeToAlcoholID(*attitudeToAlcoholID) {
 			return nil, ErrInvalidAttitudeToAlcoholicId
 		}
 		updateUser.AttitudeToAlcoholID = attitudeToAlcoholID
 	}
 	if attitudeToSmokingID != nil {
-		if !service.cache.IsValidAttitudeToSmokingID(*attitudeToSmokingID) {
+		if !s.cache.IsValidAttitudeToSmokingID(*attitudeToSmokingID) {
 			return nil, ErrInvalidAttitudeToSmokingId
 		}
 		updateUser.AttitudeToSmokingID = attitudeToSmokingID
 	}
 
-	err = service.userProvider.Update(id, updateUser)
+	err = s.userProvider.Update(id, updateUser)
 	if err != nil {
 		return nil, err
 	}
-	userUpd, err := service.userProvider.FindById(id)
-	preloadCache(userUpd, service.cache)
+	userUpd, err := s.userProvider.FindById(id)
+	preloadCache(userUpd, s.cache)
 	return userUpd, err
 }
 
-func (service *ProfileService) UpdateInterests(userID uint, interestIDs []uint) ([]*model.Interest, error) {
-	if !service.cache.IsValidInterestIDs(interestIDs) {
+func (s *Service) UpdateInterests(userID uint, interestIDs []uint) ([]*model.Interest, error) {
+	if !s.cache.IsValidInterestIDs(interestIDs) {
 		return nil, ErrInvalidInterestId
 	}
 	interestsToSet := make([]*model.Interest, len(interestIDs))
 	for i, id := range interestIDs {
 		interestsToSet[i] = &model.Interest{ID: id}
 	}
-	interest, err := service.userProvider.UpdateInterests(userID, interestsToSet)
+	interest, err := s.userProvider.UpdateInterests(userID, interestsToSet)
 	if err != nil {
 		return nil, err
 	}
 	return interest, nil
 }
 
-func (service *ProfileService) AddPhoto(ctx context.Context, userID uint, data []byte, fileName string) (*model.Photo, error) {
-	count, err := service.photoProvider.CountPhoto(userID)
+func (s *Service) AddPhoto(ctx context.Context, userID uint, data []byte, fileName string) (*model.Photo, error) {
+	count, err := s.photoProvider.CountPhoto(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrUserNotFound
@@ -149,15 +149,15 @@ func (service *ProfileService) AddPhoto(ctx context.Context, userID uint, data [
 	if count >= 5 {
 		return nil, ErrLimitPhoto
 	}
-	addPhoto, err := service.photoProvider.AddPhoto(ctx, userID, data, fileName)
+	addPhoto, err := s.photoProvider.AddPhoto(ctx, userID, data, fileName)
 	if err != nil {
 		return nil, err
 	}
 	return addPhoto, nil
 }
 
-func (service *ProfileService) DeletePhoto(ctx context.Context, photoId string, userId uint) error {
-	rowsAffected, err := service.photoProvider.DeletePhoto(ctx, photoId, userId)
+func (s *Service) DeletePhoto(ctx context.Context, photoId string, userId uint) error {
+	rowsAffected, err := s.photoProvider.DeletePhoto(ctx, photoId, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ErrPhotoNotFound
@@ -170,16 +170,16 @@ func (service *ProfileService) DeletePhoto(ctx context.Context, photoId string, 
 	return nil
 }
 
-func (service *ProfileService) UpdateAvatar(photoId string, userID uint) (string, error) {
-	newAvatarId, err := service.photoProvider.ChangeAvatarUser(photoId, userID)
+func (s *Service) UpdateAvatar(photoId string, userID uint) (string, error) {
+	newAvatarId, err := s.photoProvider.ChangeAvatarUser(photoId, userID)
 	if err != nil {
 		return "", err
 	}
 	return newAvatarId, nil
 }
 
-func (service *ProfileService) GetAvatar(userID uint) (string, error) {
-	avatarUrl, err := service.photoProvider.FindAvatar(userID)
+func (s *Service) GetAvatar(userID uint) (string, error) {
+	avatarUrl, err := s.photoProvider.FindAvatar(userID)
 	if err != nil {
 		return "", err
 	}

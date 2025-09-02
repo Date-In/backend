@@ -9,25 +9,25 @@ import (
 
 const TokenDuration = time.Hour * 72
 
-type AuthService struct {
+type Service struct {
 	userProvider UserProvider
 	cache        CacheProvider
 	tokenManager *JWT.JWT
 }
 
-func NewAuthService(userProvider UserProvider, cache CacheProvider, tm *JWT.JWT) *AuthService {
-	return &AuthService{userProvider: userProvider, cache: cache, tokenManager: tm}
+func NewAuthService(userProvider UserProvider, cache CacheProvider, tm *JWT.JWT) *Service {
+	return &Service{userProvider: userProvider, cache: cache, tokenManager: tm}
 }
 
-func (service *AuthService) Register(phone string, name string, password string, sexID uint, age uint) (*string, error) {
-	exist, err := service.userProvider.FindUserByPhone(phone)
+func (s *Service) Register(phone string, name string, password string, sexID uint, age uint) (*string, error) {
+	exist, err := s.userProvider.FindUserByPhone(phone)
 	if err != nil {
 		return nil, err
 	}
 	if exist != nil {
 		return nil, ErrUserAlreadyExists
 	}
-	if !service.cache.IsValidSexID(sexID) {
+	if !s.cache.IsValidSexID(sexID) {
 		return nil, ErrInvalidSexID
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -44,12 +44,12 @@ func (service *AuthService) Register(phone string, name string, password string,
 		StatusID: 1,
 	}
 
-	err = service.userProvider.Create(createdUser)
+	err = s.userProvider.Create(createdUser)
 	if err != nil {
 		return nil, err
 	}
 
-	token, err := service.tokenManager.GenerateToken(createdUser.ID, TokenDuration)
+	token, err := s.tokenManager.GenerateToken(createdUser.ID, TokenDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func (service *AuthService) Register(phone string, name string, password string,
 	return &token, nil
 }
 
-func (service *AuthService) Login(phone, password string) (*string, error) {
-	exist, err := service.userProvider.FindUserByPhone(phone)
+func (s *Service) Login(phone, password string) (*string, error) {
+	exist, err := s.userProvider.FindUserByPhone(phone)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (service *AuthService) Login(phone, password string) (*string, error) {
 		return nil, ErrIncorrectPasswordOrPhone
 	}
 
-	token, err := service.tokenManager.GenerateToken(exist.ID, TokenDuration)
+	token, err := s.tokenManager.GenerateToken(exist.ID, TokenDuration)
 	if err != nil {
 		return nil, err
 	}

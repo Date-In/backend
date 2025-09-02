@@ -8,16 +8,16 @@ import (
 	"time"
 )
 
-type MatchRepository struct {
+type Repository struct {
 	db *db.Db
 }
 
-func NewMatchRepository(db *db.Db) *MatchRepository {
-	return &MatchRepository{db}
+func NewMatchRepository(db *db.Db) *Repository {
+	return &Repository{db}
 }
 
-func (repo *MatchRepository) Create(userID1, userID2 uint) error {
-	err := repo.db.PgDb.Create(&model.Match{
+func (r *Repository) Create(userID1, userID2 uint) error {
+	err := r.db.PgDb.Create(&model.Match{
 		User1ID:   userID1,
 		User2ID:   userID2,
 		CreatedAt: time.Now(),
@@ -28,10 +28,10 @@ func (repo *MatchRepository) Create(userID1, userID2 uint) error {
 	return nil
 }
 
-func (repo *MatchRepository) GetAllWithDetails(userId uint) ([]model.Match, error) {
+func (r *Repository) GetAllWithDetails(userId uint) ([]model.Match, error) {
 	var matches []model.Match
 
-	err := repo.db.PgDb.Model(&model.Match{}).
+	err := r.db.PgDb.Model(&model.Match{}).
 		Preload("User1", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id", "name")
 		}).
@@ -54,7 +54,7 @@ func (repo *MatchRepository) GetAllWithDetails(userId uint) ([]model.Match, erro
 	return matches, nil
 }
 
-func (r *MatchRepository) IsUserInMatch(userID uint, matchID uint) (bool, error) {
+func (r *Repository) IsUserInMatch(userID uint, matchID uint) (bool, error) {
 	var count int64
 	result := r.db.PgDb.Model(&model.Match{}).
 		Where("id = ? AND (user1_id = ? OR user2_id = ?)", matchID, userID, userID).
@@ -70,7 +70,7 @@ func (r *MatchRepository) IsUserInMatch(userID uint, matchID uint) (bool, error)
 	return count > 0, nil
 }
 
-func (r *MatchRepository) GetMatchUserIDs(userID uint) ([]uint, error) {
+func (r *Repository) GetMatchUserIDs(userID uint) ([]uint, error) {
 	var partnerIDs []uint
 	var partnerIDsFromUser1 []uint
 	err := r.db.PgDb.Model(&model.Match{}).
@@ -92,10 +92,10 @@ func (r *MatchRepository) GetMatchUserIDs(userID uint) ([]uint, error) {
 	return partnerIDs, nil
 }
 
-func (repo *MatchRepository) GetUsers(matchID uint) ([]model.User, error) {
+func (r *Repository) GetUsers(matchID uint) ([]model.User, error) {
 	var match model.Match
 
-	err := repo.db.PgDb.
+	err := r.db.PgDb.
 		Preload("User1").
 		Preload("User2").
 		First(&match, matchID).Error

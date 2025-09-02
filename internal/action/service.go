@@ -4,22 +4,22 @@ import (
 	"time"
 )
 
-type ActionsService struct {
+type Service struct {
 	userProvider  UserProvider
 	actionStorage ActionStorage
 }
 
-func NewActionsService(userProvider UserProvider, actionStorage ActionStorage) *ActionsService {
-	return &ActionsService{userProvider, actionStorage}
+func NewActionsService(userProvider UserProvider, actionStorage ActionStorage) *Service {
+	return &Service{userProvider, actionStorage}
 }
 
-func (service *ActionsService) ChangeStatusToNonActive() {
+func (s *Service) ChangeStatusToNonActive() {
 	inactiveThreshold := time.Now().AddDate(-1, 0, 0)
-	idsToDeactivate, err := service.actionStorage.GetNonActiveUserIds(inactiveThreshold)
+	idsToDeactivate, err := s.actionStorage.GetNonActiveUserIds(inactiveThreshold)
 	if err != nil {
 		return
 	}
-	err = service.userProvider.ChangeStatus(idsToDeactivate)
+	err = s.userProvider.ChangeStatus(idsToDeactivate)
 	if err != nil {
 		return
 	}

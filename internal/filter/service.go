@@ -4,16 +4,16 @@ import (
 	"dating_service/internal/model"
 )
 
-type FilterService struct {
+type Service struct {
 	filterStorage FilterStorage
 }
 
-func NewFilterService(filterStorage FilterStorage) *FilterService {
-	return &FilterService{filterStorage: filterStorage}
+func NewFilterService(filterStorage FilterStorage) *Service {
+	return &Service{filterStorage: filterStorage}
 }
 
-func (service *FilterService) CreateFilter(userId, minAge, maxAge, sexId uint, location string) error {
-	filter, err := service.filterStorage.GetFilterUser(userId)
+func (s *Service) CreateFilter(userId, minAge, maxAge, sexId uint, location string) error {
+	filter, err := s.filterStorage.GetFilterUser(userId)
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func (service *FilterService) CreateFilter(userId, minAge, maxAge, sexId uint, l
 	if minAge > maxAge {
 		return ErrMaxAndMinValue
 	}
-	err = service.filterStorage.CreateFilter(model.FilterSearch{
+	err = s.filterStorage.CreateFilter(model.FilterSearch{
 		UserID:   userId,
 		MinAge:   minAge,
 		MaxAge:   maxAge,
@@ -36,8 +36,8 @@ func (service *FilterService) CreateFilter(userId, minAge, maxAge, sexId uint, l
 	return nil
 }
 
-func (service *FilterService) GetFilter(userID uint) (*model.FilterSearch, error) {
-	filter, err := service.filterStorage.GetFilterUser(userID)
+func (s *Service) GetFilter(userID uint) (*model.FilterSearch, error) {
+	filter, err := s.filterStorage.GetFilterUser(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +47,8 @@ func (service *FilterService) GetFilter(userID uint) (*model.FilterSearch, error
 	return filter, nil
 }
 
-func (service *FilterService) UpdateUserFilter(userID uint, minAge, maxAge, sexId *uint, location *string) error {
-	existingFilter, err := service.filterStorage.GetFilterUser(userID)
+func (s *Service) UpdateUserFilter(userID uint, minAge, maxAge, sexId *uint, location *string) error {
+	existingFilter, err := s.filterStorage.GetFilterUser(userID)
 	if err != nil {
 		return err
 	}
@@ -71,6 +71,6 @@ func (service *FilterService) UpdateUserFilter(userID uint, minAge, maxAge, sexI
 	if existingFilter.MinAge > existingFilter.MaxAge {
 		return ErrMaxAndMinValue
 	}
-	err = service.filterStorage.UpdateFilter(*existingFilter)
+	err = s.filterStorage.UpdateFilter(*existingFilter)
 	return err
 }
