@@ -8,4 +8,6 @@ type MatchStorage interface {
 	IsUserInMatch(uint, uint) (bool, error)
 	GetMatchUserIDs(uint) ([]uint, error)
 	GetUsers(matchID uint) ([]model.User, error)
+	Delete(matchID uint) error
+	GetAll() ([]model.Match, error)
 }

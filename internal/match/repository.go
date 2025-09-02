@@ -111,3 +111,25 @@ func (r *Repository) GetUsers(matchID uint) ([]model.User, error) {
 
 	return users, nil
 }
+
+func (r *Repository) Delete(matchID uint) error {
+	err := r.db.PgDb.Delete(&model.Match{}, matchID).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("match not found")
+		}
+		return err
+	}
+	return nil
+}
+
+func (r *Repository) GetAll() ([]model.Match, error) {
+	var matches []model.Match
+	err := r.db.PgDb.
+		Preload("LastMessage").
+		Find(&matches).Error
+	if err != nil {
+		return nil, err
+	}
+	return matches, nil
+}

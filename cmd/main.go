@@ -93,6 +93,7 @@ func main() {
 	notifierService := notifier.NewService(notifierHub, activityService, matchService)
 	chatService := chat.NewService(matchService, messageService, notifierService)
 	//background tasks
+	//set non active status
 	go func() {
 		ticker := time.NewTicker(24 * time.Hour)
 		defer ticker.Stop()
@@ -101,7 +102,18 @@ func main() {
 			<-ticker.C
 		}
 	}()
-
+	//delete match
+	go func() {
+		ticker := time.NewTicker(24 * time.Hour)
+		defer ticker.Stop()
+		for {
+			err = matchService.CleanupInactiveMatch()
+			if err != nil {
+				log.Println(err)
+			}
+			<-ticker.C
+		}
+	}()
 	//handler-public
 	fileServer := http.FileServer(http.Dir("./"))
 	publicRouter.Handle("/swagger/oas.yaml", http.StripPrefix("/swagger/", fileServer))
