@@ -48,3 +48,7 @@ func (s *Service) GetHistory(matchID uint, limit int) ([]*model.Message, error) 
 func (s *Service) MarkMessageIsRead(messagesID []uint) error {
 	return s.messageStorage.MarkMessageIsRead(messagesID)
 }
+
+func (s *Service) Delete(messagesID []uint) error {
+	return s.messageStorage.Delete(messagesID)
+}

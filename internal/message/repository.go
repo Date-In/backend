@@ -52,3 +52,15 @@ func (r *Repository) MarkMessageIsRead(messagesID []uint) error {
 	}
 	return nil
 }
+
+func (r *Repository) Delete(messagesID []uint) error {
+	err := r.db.PgDb.Model(&model.Message{}).
+		Where("id IN ?", messagesID).
+		Delete(&model.Message{}).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+	}
+	return err
+}

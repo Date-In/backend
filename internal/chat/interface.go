@@ -23,6 +23,7 @@ type MessageProvider interface {
 	CreateAndSaveMessage(message *model.Message) (*model.Message, error)
 	GetHistory(matchID uint, limit int) ([]*model.Message, error)
 	MarkMessageIsRead(messagesID []uint) error
+	Delete(messagesID []uint) error
 }
 
 type ChatProvider interface {

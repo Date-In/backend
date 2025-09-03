@@ -12,6 +12,7 @@ import (
 const (
 	eventMessageIsRead = "message_read"
 	eventNewMessage    = "new_message"
+	eventMessageDelete = "message_delete"
 )
 
 var ErrForbidden = errors.New("user is not a participant in this match")
@@ -94,6 +95,11 @@ func (s *Service) ProcessEvent(hub *Hub, eventData *EventWithSender) error {
 		if err != nil {
 			return err
 		}
+	case eventMessageDelete:
+		err := s.deleteMessage(event, sender, hub)
+		if err != nil {
+			return err
+		}
 	default:
 		log.Printf("Unknown event type received: %s", event.EventType)
 		return errors.New("unknown event type")
@@ -165,6 +171,22 @@ func (s *Service) MarkMessageIsRead(event *EventMessage, sender *Client, hub *Hu
 	return nil
 }
 
+func (s *Service) deleteMessage(event *EventMessage, sender *Client, hub *Hub) error {
+	var payload struct {
+		MessagesID []uint `json:"messages_id"`
+	}
+	err := json.Unmarshal(event.Payload, &payload)
+	if err != nil {
+		return err
+	}
+	err = s.messageProvider.Delete(payload.MessagesID)
+	if err != nil {
+		return err
+	}
+	s.notifyMessageDelete(event, sender, hub)
+	return nil
+}
+
 func (s *Service) notifyNewMessage(event *EventMessage, sender *Client, hub *Hub) {
 	secondUserOnline := false
 	for client, _ := range hub.clients {
@@ -196,6 +218,26 @@ func (s *Service) notifyNewMessage(event *EventMessage, sender *Client, hub *Hub
 }
 
 func (s *Service) notifyMessageIsRead(event *EventMessage, sender *Client, hub *Hub) {
+	users, err := s.matchProvider.GetUsers(hub.ID)
+	if err != nil {
+		log.Printf("Service Error: failed to get match users: %v", err)
+		return
+	}
+	var recipientId uint
+	if len(users) > 0 {
+		if users[0].ID == sender.ID {
+			recipientId = users[1].ID
+		} else {
+			recipientId = users[0].ID
+		}
+	} else {
+		log.Printf("Service Error: failed to get match users: %v", ErrForbidden)
+		return
+	}
+	s.notify.NotifyUser(recipientId, event.EventType, event.Payload)
+}
+
+func (s *Service) notifyMessageDelete(event *EventMessage, sender *Client, hub *Hub) {
 	users, err := s.matchProvider.GetUsers(hub.ID)
 	if err != nil {
 		log.Printf("Service Error: failed to get match users: %v", err)
